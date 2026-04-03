@@ -19,6 +19,8 @@
         width: 100%;
         height: 100%;
         overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
       }
 
       /* ===== 移动端：直接全屏 ===== */
@@ -36,9 +38,19 @@
 
       /* ===== PC 端：手机框架 ===== */
       @media (min-width: 601px) {
+        /* 微信小程序规范尺寸变量 */
         :root {
-          --status-bar-height: 55px;
-          --window-top: 55px;
+          --mp-status-bar-height: 44px;
+          --mp-capsule-width: 87px;
+          --mp-capsule-height: 32px;
+          --mp-capsule-right: 7px;
+          --mp-capsule-top: calc(var(--mp-status-bar-height) + 4px);
+          --mp-navbar-content-height: 40px;
+          --mp-navbar-height: calc(var(--mp-status-bar-height) + var(--mp-navbar-content-height));
+          /* uni-app nav-bar 实际 padding: 20rpx 32rpx 16rpx ≈ 10px 16px 8px */
+          /* 我们需要把 nav-bar 的 padding-top 设为 44px */
+          --status-bar-height: 44px;
+          --window-top: 44px;
         }
 
         body {
@@ -46,81 +58,59 @@
           align-items: center;
           justify-content: center;
           min-height: 100vh;
-          background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+          background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #0f1a0f 100%);
         }
 
-        /* 手机外壳 */
+        /* 背景光晕装饰 */
+        body::before {
+          content: '';
+          position: fixed;
+          top: 25%;
+          left: 25%;
+          width: 384px;
+          height: 384px;
+          border-radius: 50%;
+          background: #1DB954;
+          opacity: 0.05;
+          filter: blur(80px);
+          pointer-events: none;
+        }
+        body::after {
+          content: '';
+          position: fixed;
+          bottom: 25%;
+          right: 25%;
+          width: 320px;
+          height: 320px;
+          border-radius: 50%;
+          background: #1677FF;
+          opacity: 0.05;
+          filter: blur(80px);
+          pointer-events: none;
+        }
+
+        /* ── 手机外壳（刘海屏，与参考项目一致） ── */
         .phone-shell {
           position: relative;
           width: 390px;
           height: 844px;
-          background: #111;
-          border-radius: 55px;
-          padding: 12px;
+          background: #fff;
+          border-radius: 48px;
           box-shadow:
-            0 0 0 1px #3a3a3a,
-            0 0 0 3px #111,
-            0 0 0 4px #444,
-            0 40px 100px rgba(0,0,0,0.7),
-            inset 0 0 0 1px rgba(255,255,255,0.07);
+            0 0 0 2px #2a2a2a,
+            0 0 0 6px #1a1a1a,
+            0 40px 80px rgba(0,0,0,0.6);
+          overflow: hidden;
           flex-shrink: 0;
+          z-index: 1;
         }
 
-        /* 右侧静音键 */
-        .phone-shell::after {
-          content: '';
-          position: absolute;
-          right: -3px;
-          top: 180px;
-          width: 3px;
-          height: 64px;
-          background: #2a2a2a;
-          border-radius: 0 2px 2px 0;
-          box-shadow: 0 100px 0 #2a2a2a;
-        }
-
-        /* 左侧按键组 */
-        .phone-side-btn {
-          position: absolute;
-          left: -3px;
-          top: 160px;
-          width: 3px;
-          height: 32px;
-          background: #2a2a2a;
-          border-radius: 2px 0 0 2px;
-          z-index: 10;
-        }
-        .phone-side-btn::before {
-          content: '';
-          position: absolute;
-          top: 48px;
-          left: 0;
-          width: 3px;
-          height: 60px;
-          background: #2a2a2a;
-          border-radius: 2px 0 0 2px;
-        }
-        .phone-side-btn::after {
-          content: '';
-          position: absolute;
-          top: 124px;
-          left: 0;
-          width: 3px;
-          height: 60px;
-          background: #2a2a2a;
-          border-radius: 2px 0 0 2px;
-        }
-
-        /*
-         * 屏幕区域
-         * transform 创建新的 containing block，
-         * 使 uni-app 内所有 position:fixed 元素相对于此容器定位
-         */
+        /* 屏幕区域（transform 创建新的 containing block） */
         .phone-screen {
-          position: relative;
+          position: absolute;
+          inset: 0;
           width: 100%;
           height: 100%;
-          border-radius: 44px;
           overflow: hidden;
           background: #F5F5F5;
           transform: translateZ(0);
@@ -129,22 +119,89 @@
         }
         .phone-screen::-webkit-scrollbar { display: none; }
 
-        /* 动态岛 */
-        .dynamic-island {
+        /* ── 刘海（非动态岛） ── */
+        .mp-notch {
           position: absolute;
-          top: 12px;
+          top: 0;
           left: 50%;
           transform: translateX(-50%);
-          width: 126px;
-          height: 37px;
-          background: #111;
-          border-radius: 20px;
+          width: 150px;
+          height: 30px;
+          background: #000;
+          border-radius: 0 0 20px 20px;
           z-index: 99999;
           pointer-events: none;
-          box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
         }
 
-        /* App 容器 */
+        /* ── 微信状态栏 ── */
+        .mp-status-bar {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 44px;
+          background: #fff;
+          display: flex;
+          align-items: flex-end;
+          padding: 0 16px 6px;
+          z-index: 9999;
+          pointer-events: none;
+        }
+        .mp-status-bar .mp-time {
+          font-size: 15px;
+          font-weight: 600;
+          color: #1a1a1a;
+          letter-spacing: 0.02em;
+        }
+        .mp-status-bar .mp-icons {
+          margin-left: auto;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding-right: 100px; /* 留出胶囊宽度 */
+        }
+
+        /* ── 右上角胶囊按钮 ── */
+        .mp-capsule {
+          position: absolute;
+          right: 7px;
+          top: calc(44px + 4px);
+          width: 87px;
+          height: 32px;
+          border-radius: 16px;
+          border: 0.5px solid rgba(0,0,0,0.12);
+          background: rgba(255,255,255,0.9);
+          display: flex;
+          align-items: center;
+          justify-content: space-around;
+          padding: 0 10px;
+          z-index: 99998;
+          backdrop-filter: blur(8px);
+          box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+          pointer-events: none;
+        }
+        .mp-capsule-divider {
+          width: 0.5px;
+          height: 16px;
+          background: rgba(0,0,0,0.15);
+        }
+
+        /* ── Home 指示条 ── */
+        .mp-home-indicator {
+          position: absolute;
+          bottom: 6px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 134px;
+          height: 5px;
+          background: #000;
+          border-radius: 3px;
+          opacity: 0.2;
+          z-index: 99999;
+          pointer-events: none;
+        }
+
+        /* ── App 容器 ── */
         #app {
           position: absolute;
           inset: 0;
@@ -161,14 +218,12 @@
           height: 100%;
           overflow: hidden;
         }
-
         #app uni-page {
           display: block;
           width: 100%;
           height: 100%;
           overflow: hidden;
         }
-
         #app uni-page-wrapper {
           display: block;
           position: relative;
@@ -176,8 +231,6 @@
           height: calc(100% - 50px);
           overflow: hidden;
         }
-
-        /* 页面内容：内部滚动 */
         #app uni-page-body {
           display: block;
           position: absolute;
@@ -204,75 +257,216 @@
 
         /* 全局隐藏所有滚动条 */
         #app *::-webkit-scrollbar { display: none; }
-        #app * {
-          scrollbar-width: none;
-          -ms-overflow-style: none;
+        #app * { scrollbar-width: none; -ms-overflow-style: none; }
+
+        /* ── 右侧说明文字（超宽屏可见） ── */
+        .phone-info {
+          position: fixed;
+          right: 32px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: rgba(255,255,255,0.4);
+          font-size: 13px;
+          display: none;
+          max-width: 180px;
+        }
+        @media (min-width: 1280px) {
+          .phone-info { display: block; }
+        }
+        .phone-info-title {
+          font-size: 15px;
+          font-weight: 600;
+          color: rgba(255,255,255,0.6);
+          margin-bottom: 8px;
+        }
+        .phone-info-desc {
+          line-height: 1.6;
+          font-size: 13px;
+          margin-bottom: 16px;
+        }
+        .phone-info-tabs {
+          font-size: 12px;
+          line-height: 2;
         }
       }
     </style>
   </head>
   <body>
+    <!-- 手机外壳 -->
     <div class="phone-shell">
-      <div class="phone-side-btn"></div>
       <div class="phone-screen">
-        <!-- 动态岛浮层 -->
-        <div class="dynamic-island"></div>
+        <!-- 刘海 -->
+        <div class="mp-notch"></div>
+        <!-- 微信状态栏 -->
+        <div class="mp-status-bar" id="mp-status-bar">
+          <span class="mp-time" id="mp-time">00:00</span>
+          <div class="mp-icons">
+            <!-- 信号 -->
+            <svg width="17" height="12" viewBox="0 0 17 12" fill="#1a1a1a">
+              <rect x="0" y="7" width="3" height="5" rx="0.5"/>
+              <rect x="4.5" y="4.5" width="3" height="7.5" rx="0.5"/>
+              <rect x="9" y="2" width="3" height="10" rx="0.5"/>
+              <rect x="13.5" y="0" width="3" height="12" rx="0.5"/>
+            </svg>
+            <!-- WiFi -->
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+              <path d="M8 9.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z" fill="#1a1a1a"/>
+              <path d="M3.5 6.5C4.8 5.2 6.3 4.5 8 4.5s3.2.7 4.5 2" stroke="#1a1a1a" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+              <path d="M1 3.5C3 1.4 5.4 0.5 8 0.5s5 .9 7 3" stroke="#1a1a1a" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+            </svg>
+            <!-- 电池 -->
+            <svg width="25" height="12" viewBox="0 0 25 12" fill="none">
+              <rect x="0.5" y="0.5" width="21" height="11" rx="2.5" stroke="#1a1a1a" stroke-width="1"/>
+              <rect x="2" y="2" width="16" height="8" rx="1.5" fill="#1a1a1a"/>
+              <path d="M22.5 4v4" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+        <!-- 右上角胶囊按钮 -->
+        <div class="mp-capsule">
+          <!-- 更多 -->
+          <svg width="18" height="4" viewBox="0 0 18 4" fill="none">
+            <circle cx="2" cy="2" r="2" fill="#1a1a1a"/>
+            <circle cx="9" cy="2" r="2" fill="#1a1a1a"/>
+            <circle cx="16" cy="2" r="2" fill="#1a1a1a"/>
+          </svg>
+          <div class="mp-capsule-divider"></div>
+          <!-- 关闭 -->
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M1 1L13 13M13 1L1 13" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <!-- Home 指示条 -->
+        <div class="mp-home-indicator"></div>
+        <!-- uni-app 内容 -->
         <div id="app"><!--app-html--></div>
       </div>
     </div>
+
+    <!-- 右侧说明文字（超宽屏） -->
+    <div class="phone-info">
+      <div class="phone-info-title">微澜 PulseRead</div>
+      <div class="phone-info-desc">用户端小程序交互预览<br>模拟 iPhone 14 Pro 尺寸<br>390 × 844 px</div>
+      <div class="phone-info-tabs">
+        🌊 资讯发现<br>
+        🔍 智能搜索<br>
+        🎯 偏好设置<br>
+        👤 个人中心
+      </div>
+    </div>
+
     <script type="module" src="/src/main.ts"></script>
     <script>
-      // 仅在 PC 端（手机框架模式）注入状态栏高度适配
+      // ── 仅在 PC 端执行 ──
       if (window.innerWidth > 600) {
-        // 动态岛高度：top(12) + height(37) + gap(6) = 55px
-        var STATUS_BAR_H = 55;
 
-        // 注入动态样式，使用属性选择器通配符绕过 scoped CSS
-        function injectNavBarStyle() {
-          var existing = document.getElementById('__nav-bar-fix__');
-          if (existing) return;
+        // 1. 实时更新状态栏时间
+        function updateTime() {
+          var el = document.getElementById('mp-time');
+          if (!el) return;
+          var now = new Date();
+          var h = now.getHours().toString().padStart(2, '0');
+          var m = now.getMinutes().toString().padStart(2, '0');
+          el.textContent = h + ':' + m;
+        }
+        updateTime();
+        setInterval(updateTime, 10000);
 
-          var style = document.createElement('style');
-          style.id = '__nav-bar-fix__';
-          // 使用 :is() 或属性通配符提高优先级
-          style.textContent = [
-            // 通配所有带 data-v-* scoped 属性的 .nav-bar
-            '#app .nav-bar { padding-top: ' + STATUS_BAR_H + 'px !important; }',
-            // 针对 feed 页面的特殊处理（fixed 定位的导航栏）
-            '#app .nav-bar[style*="position"] { top: 0 !important; padding-top: ' + STATUS_BAR_H + 'px !important; }',
-          ].join('\n');
-          document.head.appendChild(style);
+        // 2. 状态栏高度 = 44px（微信小程序规范刘海屏）
+        var STATUS_BAR_H = 52;
+
+        // 3. 注入 nav-bar padding-top（避开状态栏）
+        // uni-app 编译后 .nav-bar 有 scoped 属性，用 MutationObserver + inline style 强制覆盖
+        function applyNavBarFix() {
+          var navBars = document.querySelectorAll('.nav-bar');
+          navBars.forEach(function(el) {
+            el.style.setProperty('padding-top', STATUS_BAR_H + 'px', 'important');
+          });
         }
 
-        // 使用 MutationObserver 监听 DOM 变化，确保在 uni-app 渲染后注入
-        var observer = new MutationObserver(function(mutations) {
-          var navBar = document.querySelector('.nav-bar');
-          if (navBar) {
-            injectNavBarStyle();
-            // 直接操作已渲染的 nav-bar 元素，强制设置 padding-top
-            var allNavBars = document.querySelectorAll('.nav-bar');
-            allNavBars.forEach(function(el) {
-              el.style.setProperty('padding-top', STATUS_BAR_H + 'px', 'important');
-            });
-          }
+        // 4. MutationObserver 监听 DOM 变化
+        var observer = new MutationObserver(function() {
+          applyNavBarFix();
         });
-
-        // 在 DOM 加载完成后启动观察
         document.addEventListener('DOMContentLoaded', function() {
-          observer.observe(document.body, {
-            childList: true,
-            subtree: true
-          });
+          observer.observe(document.body, { childList: true, subtree: true });
+          applyNavBarFix();
         });
 
-        // 路由切换时重新应用（uni-app SPA 路由跳转）
+        // 5. 路由切换时重新应用
         window.addEventListener('hashchange', function() {
-          setTimeout(function() {
-            var allNavBars = document.querySelectorAll('.nav-bar');
-            allNavBars.forEach(function(el) {
-              el.style.setProperty('padding-top', STATUS_BAR_H + 'px', 'important');
-            });
-          }, 100);
+          setTimeout(applyNavBarFix, 150);
+        });
+
+        // 6. 覆盖 TabBar 图标为 SVG 线条图标（与参考项目一致）
+        // uni-app TabBar 渲染为 <img> 标签，通过 MutationObserver 替换
+        var TAB_SVGS = {
+          // 发现（房子）
+          feed: {
+            default: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 9.5L12 3L21 9.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z" stroke="#BDBDBD" stroke-width="1.6" fill="none" stroke-linejoin="round"/><path d="M9 21V12h6v9" stroke="#BDBDBD" stroke-width="1.6" stroke-linecap="round"/></svg>',
+            active: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 9.5L12 3L21 9.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z" stroke="#1DB954" stroke-width="1.6" fill="#E8F8EE" stroke-linejoin="round"/><path d="M9 21V12h6v9" stroke="#1DB954" stroke-width="1.6" stroke-linecap="round"/></svg>',
+          },
+          // 搜索（放大镜）
+          search: {
+            default: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#BDBDBD" stroke-width="1.6" fill="none"/><path d="M16.5 16.5L21 21" stroke="#BDBDBD" stroke-width="1.6" stroke-linecap="round"/></svg>',
+            active: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#1DB954" stroke-width="1.6" fill="#E8F8EE"/><path d="M16.5 16.5L21 21" stroke="#1DB954" stroke-width="1.6" stroke-linecap="round"/></svg>',
+          },
+          // 偏好（设置齿轮）
+          pref: {
+            default: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="#BDBDBD" stroke-width="1.6" fill="none"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12" stroke="#BDBDBD" stroke-width="1.6" stroke-linecap="round"/></svg>',
+            active: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="#1DB954" stroke-width="1.6" fill="#1DB954"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12" stroke="#1DB954" stroke-width="1.6" stroke-linecap="round"/></svg>',
+          },
+          // 我的（人物）
+          profile: {
+            default: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#BDBDBD" stroke-width="1.6" fill="none"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#BDBDBD" stroke-width="1.6" stroke-linecap="round"/></svg>',
+            active: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#1DB954" stroke-width="1.6" fill="#E8F8EE"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#1DB954" stroke-width="1.6" stroke-linecap="round"/></svg>',
+          },
+        };
+
+        // TabBar 图标路径到 SVG key 的映射
+        var ICON_MAP = {
+          'tab-feed.png': { key: 'feed', active: false },
+          'tab-feed-active.png': { key: 'feed', active: true },
+          'tab-search.png': { key: 'search', active: false },
+          'tab-search-active.png': { key: 'search', active: true },
+          'tab-pref.png': { key: 'pref', active: false },
+          'tab-pref-active.png': { key: 'pref', active: true },
+          'tab-profile.png': { key: 'profile', active: false },
+          'tab-profile-active.png': { key: 'profile', active: true },
+        };
+
+        function replaceTabBarIcons() {
+          var imgs = document.querySelectorAll('uni-tabbar img, .uni-tabbar-item img');
+          imgs.forEach(function(img) {
+            var src = img.getAttribute('src') || '';
+            var filename = src.split('/').pop();
+            var mapping = ICON_MAP[filename];
+            if (!mapping) return;
+            var svgData = TAB_SVGS[mapping.key];
+            if (!svgData) return;
+            var svgStr = mapping.active ? svgData.active : svgData.default;
+            // 将 img 替换为 SVG span
+            var wrapper = img.parentElement;
+            if (wrapper && !wrapper.querySelector('.svg-icon-replaced')) {
+              var span = document.createElement('span');
+              span.className = 'svg-icon-replaced';
+              span.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;';
+              span.innerHTML = svgStr;
+              img.style.display = 'none';
+              wrapper.insertBefore(span, img);
+            }
+          });
+        }
+
+        // 监听 TabBar 渲染
+        var tabObserver = new MutationObserver(function() {
+          replaceTabBarIcons();
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+          tabObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
+        });
+        window.addEventListener('hashchange', function() {
+          setTimeout(replaceTabBarIcons, 200);
         });
       }
     </script>
