@@ -218,7 +218,7 @@ async function onRefresh() {
 .nav-bar {
   display: flex;
   align-items: center;
-  padding: 16rpx 32rpx;
+  padding: 20rpx 32rpx 12rpx;
   background: #fff;
 }
 
@@ -278,14 +278,14 @@ async function onRefresh() {
   margin-left: 2rpx;
 }
 
-/* 地区 Tab（文字+下划线样式） */
+/* 地区 Tab */
 .region-tabs {
   display: flex;
   align-items: center;
-  padding: 0 32rpx;
-  gap: 40rpx;
+  padding: 12rpx 32rpx 0;
+  gap: 48rpx;
   background: #fff;
-  height: 72rpx;
+  height: 64rpx;
 }
 
 .region-tab {
@@ -293,62 +293,56 @@ async function onRefresh() {
   height: 100%;
   display: flex;
   align-items: center;
-  flex-shrink: 0;
+  justify-content: center;
 }
 
-.region-tab-text {
-  font-size: 28rpx;
+.region-text {
+  font-size: 30rpx;
+  color: #999;
   font-weight: 500;
-  color: #BDBDBD;
+  transition: all 0.25s ease;
 }
 
-.region-tab.active .region-tab-text {
-  color: #111;
-  font-weight: 600;
-}
-
-.region-tab-line {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 5rpx;
-  border-radius: 4rpx;
-  background: #1DB954;
+.region-tab.active .region-text {
+  color: #1DB954;
+  font-weight: 800;
+  transform: scale(1.05);
 }
 
 /* 领域胶囊 Tab */
 .domain-tabs {
   background: #fff;
   white-space: nowrap;
-  border-bottom: 1rpx solid #F0F0F0;
-  height: 88rpx;
+  border-bottom: 1rpx solid #F2F2F2;
+  height: 104rpx;
   display: flex;
   align-items: center;
-  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.03);
+  margin-top: 8rpx;
 }
 
 .domain-tab-list {
   display: flex;
   padding: 0 32rpx;
-  gap: 16rpx;
+  gap: 24rpx;
 }
 
 .domain-tab {
-  padding: 10rpx 24rpx;
-  border-radius: 30rpx;
-  font-size: 24rpx;
+  padding: 14rpx 32rpx;
+  border-radius: 40rpx;
+  font-size: 26rpx;
   color: #666;
-  background: #F5F5F5;
+  background: #F8F8F8;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1rpx solid transparent;
 }
 
 .domain-tab.active {
-  background: #1DB954;
-  color: #fff;
+  background: rgba(29, 185, 84, 0.08);
+  color: #1DB954;
   font-weight: 600;
+  border: 1rpx solid rgba(29, 185, 84, 0.15);
 }
 
 /* 文章列表 */
@@ -358,7 +352,7 @@ async function onRefresh() {
 }
 
 .list-top-pad {
-  height: 20rpx;
+  height: 24rpx;
 }
 
 .list-footer {
