@@ -349,7 +349,7 @@ function onShare() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20rpx 32rpx 16rpx;
+  padding: 14rpx 28rpx;
   background: #fff;
   border-bottom: 1rpx solid #F0F0F0;
   flex-shrink: 0;
@@ -405,7 +405,7 @@ function onShare() {
 }
 
 .content-inner {
-  padding: 32rpx;
+  padding: 28rpx 28rpx 0;
 }
 
 /* 标签行 */
@@ -430,12 +430,12 @@ function onShare() {
 
 /* 标题 */
 .article-title {
-  font-size: 36rpx;
+  font-size: 34rpx;
   font-weight: 700;
-  color: #1A1A1A;
-  line-height: 1.5;
+  color: #111;
+  line-height: 1.55;
   display: block;
-  margin-bottom: 20rpx;
+  margin-bottom: 16rpx;
 }
 
 /* 元信息 */
@@ -522,14 +522,14 @@ function onShare() {
 }
 
 .ai-card {
-  background: #F9F9F9;
-  border-radius: 20rpx;
-  padding: 28rpx;
+  background: #F8F9FA;
+  border-radius: 16rpx;
+  padding: 24rpx;
 }
 
 .ai-summary-card {
   background: linear-gradient(135deg, #E8F8EE 0%, #F0FDF4 100%);
-  border: 1rpx solid #BBF7D0;
+  border: 1.5rpx solid #BBF7D0;
 }
 
 .ai-title-green {

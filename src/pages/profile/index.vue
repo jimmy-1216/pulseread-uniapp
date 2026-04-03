@@ -595,17 +595,17 @@ function confirmReset() {
 /* ── 绿色渐变头部 ── */
 .green-header {
   background: linear-gradient(135deg, #1DB954 0%, #059669 100%);
-  padding: 60rpx 40rpx 48rpx 40rpx;
+  padding: 48rpx 36rpx 40rpx 36rpx;
   position: relative;
-  border-bottom-left-radius: 40rpx;
-  border-bottom-right-radius: 40rpx;
+  border-bottom-left-radius: 36rpx;
+  border-bottom-right-radius: 36rpx;
 }
 
 .user-row {
   display: flex;
   align-items: center;
-  gap: 32rpx;
-  margin-bottom: 56rpx;
+  gap: 28rpx;
+  margin-bottom: 40rpx;
   position: relative;
 }
 

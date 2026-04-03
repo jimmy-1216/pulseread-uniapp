@@ -236,14 +236,14 @@ function savePreference() {
 }
 
 .nav-bar {
-  padding: 20rpx 32rpx 16rpx;
+  padding: 16rpx 28rpx;
   background: #fff;
   border-bottom: 1rpx solid #F0F0F0;
   flex-shrink: 0;
 }
 
 .nav-title {
-  font-size: 36rpx;
+  font-size: 34rpx;
   font-weight: 700;
   color: #1A1A1A;
 }
@@ -255,8 +255,8 @@ function savePreference() {
 
 .section {
   background: #fff;
-  margin: 20rpx 0 0;
-  padding: 32rpx;
+  margin: 16rpx 0 0;
+  padding: 28rpx;
 }
 
 .section-header {

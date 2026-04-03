@@ -221,16 +221,16 @@ async function onRefresh() {
 .nav-bar {
   display: flex;
   align-items: center;
-  padding: 16rpx 32rpx;
+  padding: 12rpx 28rpx;
   background: #fff;
-  gap: 16rpx;
+  gap: 14rpx;
   /* 右侧不设 padding-right，由胶囊按钮自然占位 */
 }
 
 .nav-logo-icon {
-  width: 52rpx;
-  height: 52rpx;
-  border-radius: 14rpx;
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 12rpx;
   background: linear-gradient(135deg, #1DB954, #17A348);
   display: flex;
   align-items: center;
@@ -239,11 +239,11 @@ async function onRefresh() {
 }
 
 .nav-logo {
-  font-size: 30rpx;
+  font-size: 28rpx;
 }
 
 .nav-title {
-  font-size: 36rpx;
+  font-size: 34rpx;
   font-weight: 700;
   color: #111;
   letter-spacing: 0.02em;
@@ -253,7 +253,7 @@ async function onRefresh() {
 .filter-bar {
   display: flex;
   align-items: center;
-  padding: 14rpx 32rpx;
+  padding: 10rpx 28rpx;
   background: #fff;
   border-bottom: 1.5rpx solid #F0F0F0;
   gap: 0;
@@ -268,7 +268,7 @@ async function onRefresh() {
 }
 
 .region-tab {
-  padding: 10rpx 24rpx;
+  padding: 8rpx 20rpx;
   border-radius: 32rpx;
   transition: all 0.2s ease;
 }
@@ -278,7 +278,7 @@ async function onRefresh() {
 }
 
 .region-tab-text {
-  font-size: 28rpx;
+  font-size: 26rpx;
   color: #AAAAAA;
   font-weight: 500;
   transition: all 0.2s ease;
@@ -303,7 +303,7 @@ async function onRefresh() {
   display: flex;
   align-items: center;
   gap: 6rpx;
-  padding: 8rpx 20rpx;
+  padding: 6rpx 16rpx;
   border-radius: 40rpx;
   background: #F0FDF4;
   border: 1.5rpx solid #BBF7D0;
@@ -330,7 +330,7 @@ async function onRefresh() {
 .domain-bar {
   background: #fff;
   border-bottom: 1.5rpx solid #EEEEEE;
-  padding: 12rpx 0 12rpx 24rpx;
+  padding: 10rpx 0 10rpx 24rpx;
 }
 
 .domain-scroll {
@@ -345,9 +345,9 @@ async function onRefresh() {
 }
 
 .domain-tab {
-  padding: 12rpx 28rpx;
+  padding: 10rpx 24rpx;
   border-radius: 40rpx;
-  font-size: 26rpx;
+  font-size: 25rpx;
   color: #888;
   background: #F5F5F5;
   white-space: nowrap;
@@ -370,7 +370,7 @@ async function onRefresh() {
 }
 
 .list-top-pad {
-  height: 24rpx;
+  height: 20rpx;
 }
 
 .list-footer {

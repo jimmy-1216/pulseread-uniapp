@@ -107,29 +107,29 @@ const scoreColor = computed(() => {
 <style scoped>
 .article-card {
   background: #fff;
-  margin: 0 24rpx 20rpx;
-  border-radius: 24rpx;
+  margin: 0 24rpx 16rpx;
+  border-radius: 20rpx;
   overflow: hidden;
-  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.06);
-  border: 1rpx solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+  border: 1rpx solid rgba(0, 0, 0, 0.05);
 }
 
 .card-inner {
-  padding: 28rpx;
+  padding: 28rpx 28rpx 24rpx;
 }
 
 .tags-row {
   display: flex;
   align-items: center;
-  gap: 12rpx;
-  margin-bottom: 20rpx;
+  gap: 10rpx;
+  margin-bottom: 16rpx;
   flex-wrap: wrap;
 }
 
 .tag {
   font-size: 22rpx;
-  padding: 4rpx 16rpx;
-  border-radius: 10rpx;
+  padding: 5rpx 16rpx;
+  border-radius: 8rpx;
   font-weight: 500;
 }
 
@@ -166,41 +166,35 @@ const scoreColor = computed(() => {
 
 .article-title {
   font-size: 30rpx;
-  font-weight: 600;
-  color: #1A1A1A;
-  line-height: 1.45;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-bottom: 16rpx;
+  font-weight: 700;
+  color: #111;
+  line-height: 1.5;
   display: block;
+  overflow: hidden;
+  margin-bottom: 12rpx;
 }
 
 .article-summary {
   font-size: 26rpx;
-  color: #888;
-  line-height: 1.6;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-bottom: 20rpx;
+  color: #777;
+  line-height: 1.65;
   display: block;
+  overflow: hidden;
+  margin-bottom: 16rpx;
 }
 
 .key-points {
   background: #F0FDF4;
-  border-radius: 16rpx;
-  padding: 20rpx 24rpx;
-  margin-bottom: 20rpx;
+  border-radius: 14rpx;
+  padding: 16rpx 20rpx;
+  margin-bottom: 16rpx;
 }
 
 .key-point-item {
   display: flex;
   align-items: flex-start;
-  gap: 12rpx;
-  margin-bottom: 8rpx;
+  gap: 10rpx;
+  margin-bottom: 6rpx;
 }
 
 .key-point-item:last-child {
@@ -217,10 +211,8 @@ const scoreColor = computed(() => {
 .key-point-text {
   font-size: 24rpx;
   color: #444;
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
+  line-height: 1.55;
+  display: block;
   overflow: hidden;
 }
 
@@ -241,7 +233,7 @@ const scoreColor = computed(() => {
 .source-text,
 .time-text {
   font-size: 22rpx;
-  color: #AAAAAA;
+  color: #BBBBBB;
 }
 
 .separator {

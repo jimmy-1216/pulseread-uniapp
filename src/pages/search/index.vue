@@ -178,7 +178,7 @@ function openArticle(article: Article) {
   display: flex;
   align-items: center;
   gap: 16rpx;
-  padding: 20rpx 32rpx 16rpx;
+  padding: 16rpx 28rpx;
   background: #fff;
   border-bottom: 1rpx solid #F0F0F0;
   flex-shrink: 0;
@@ -188,10 +188,10 @@ function openArticle(article: Article) {
   flex: 1;
   display: flex;
   align-items: center;
-  background: #F5F5F5;
+  background: #F3F4F6;
   border-radius: 40rpx;
   padding: 0 24rpx;
-  height: 72rpx;
+  height: 68rpx;
   gap: 12rpx;
 }
 
@@ -204,7 +204,7 @@ function openArticle(article: Article) {
   flex: 1;
   font-size: 28rpx;
   color: #333;
-  height: 72rpx;
+  height: 68rpx;
 }
 
 .clear-btn {
