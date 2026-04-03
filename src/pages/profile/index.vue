@@ -16,10 +16,11 @@
           </view>
           <view class="user-id-row">
             <text class="user-id">ID: {{ store.userInfo.id }}</text>
-            <view class="edit-btn" @tap="showDrawer('upgrade')">
-              <text class="edit-btn-text">编辑资料</text>
-            </view>
           </view>
+        </view>
+        <!-- 编辑资料移出 flex 布局，使用绝对定位 -->
+        <view class="edit-btn-absolute" @tap="showDrawer('upgrade')">
+          <text class="edit-btn-text">编辑资料</text>
         </view>
       </view>
 
@@ -594,7 +595,8 @@ function confirmReset() {
 /* ── 绿色渐变头部 ── */
 .green-header {
   background: linear-gradient(160deg, #1DB954 0%, #17A348 100%);
-  padding: 40rpx 110rpx 32rpx 32rpx;
+  padding: 40rpx 32rpx 32rpx 32rpx;
+  position: relative;
 }
 
 .user-row {
@@ -602,6 +604,7 @@ function confirmReset() {
   align-items: center;
   gap: 24rpx;
   margin-bottom: 40rpx;
+  position: relative;
 }
 
 .avatar-wrap {
@@ -655,7 +658,6 @@ function confirmReset() {
 .user-id-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 16rpx;
 }
 
@@ -664,11 +666,14 @@ function confirmReset() {
   color: rgba(255, 255, 255, 0.75);
 }
 
-.edit-btn {
-  padding: 10rpx 22rpx;
+.edit-btn-absolute {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 8rpx 20rpx;
   border-radius: 40rpx;
-  border: 2rpx solid rgba(255, 255, 255, 0.7);
-  flex-shrink: 0;
+  border: 2rpx solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .edit-btn-text {
@@ -838,12 +843,12 @@ function confirmReset() {
    抽屉系统（统一动效）
 ═══════════════════════════════════════════════════════ */
 .overlay {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 200;
+  z-index: 9999;
   display: flex;
   align-items: flex-end;
   background: rgba(0, 0, 0, 0);

@@ -218,7 +218,7 @@ async function onRefresh() {
 .nav-bar {
   display: flex;
   align-items: center;
-  padding: 12rpx 32rpx 12rpx;
+  padding: 8rpx 24rpx;
   background: #fff;
   border-bottom: 1rpx solid #F0F0F0;
 }
@@ -283,10 +283,10 @@ async function onRefresh() {
 .region-tabs {
   display: flex;
   align-items: center;
-  padding: 0 32rpx;
-  gap: 32rpx;
+  padding: 0 24rpx;
+  gap: 28rpx;
   background: #fff;
-  height: 60rpx;
+  height: 56rpx;
   border-bottom: 1rpx solid #F0F0F0;
 }
 
@@ -324,7 +324,7 @@ async function onRefresh() {
   background: #fff;
   white-space: nowrap;
   border-bottom: 1rpx solid #F5F5F5;
-  height: 64rpx;
+  height: 60rpx;
   display: flex;
   align-items: center;
 }
@@ -332,13 +332,13 @@ async function onRefresh() {
 .domain-tab-list {
   display: flex;
   padding: 0 24rpx;
-  gap: 8rpx;
+  gap: 6rpx;
 }
 
 .domain-tab {
-  padding: 10rpx 20rpx;
+  padding: 6rpx 18rpx;
   border-radius: 40rpx;
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: #666;
   background: #F0F0F0;
   white-space: nowrap;
