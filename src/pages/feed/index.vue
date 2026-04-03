@@ -1,14 +1,13 @@
 <template>
   <view class="feed-page">
-    <!-- 导航栏：第一行 Logo + 标题 + 地区 Tab -->
+    <!-- 导航栏： Logo + 地区 Tab（左对齐），右侧留空给胶囊按钮 -->
     <view class="nav-bar">
-      <view class="nav-left">
-        <view class="nav-logo-icon">
-          <text class="nav-logo">🌊</text>
-        </view>
-        <text class="nav-title">微澜</text>
+      <view class="nav-logo-icon">
+        <text class="nav-logo">🌊</text>
       </view>
-      <!-- 地区 Tab 在右侧 -->
+      <text class="nav-title">微澜</text>
+      <!-- 地区 Tab 在 Logo 右侧，用分隔线隔开 -->
+      <view class="nav-divider"></view>
       <view class="region-tabs-inline">
         <view
           v-for="r in REGION_CONFIGS"
@@ -218,16 +217,19 @@ async function onRefresh() {
 .nav-bar {
   display: flex;
   align-items: center;
-  padding: 20rpx 200rpx 20rpx 32rpx;
+  padding: 18rpx 32rpx 18rpx 32rpx;
   background: #fff;
   border-bottom: 1rpx solid #F0F0F0;
+  gap: 16rpx;
 }
 
-.nav-left {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  flex: 1;
+/* 分隔线 */
+.nav-divider {
+  width: 1.5rpx;
+  height: 32rpx;
+  background: #E0E0E0;
+  flex-shrink: 0;
+  margin: 0 4rpx;
 }
 
 .nav-logo-icon {
