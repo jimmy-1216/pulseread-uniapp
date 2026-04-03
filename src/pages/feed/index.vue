@@ -1,58 +1,58 @@
 <template>
   <view class="feed-page">
-    <!-- 导航栏 -->
+    <!-- 导航栏：第一行 Logo + 标题 + 地区 Tab -->
     <view class="nav-bar">
       <view class="nav-left">
-        <!-- Logo 图标 -->
         <view class="nav-logo-icon">
           <text class="nav-logo">🌊</text>
         </view>
         <text class="nav-title">微澜</text>
-        <!-- 降噪档位标签 -->
-        <view class="noise-badge" @tap="showNoisePicker = true">
-          <text class="noise-badge-icon">{{ currentNoiseLevelConfig?.icon }}</text>
-          <text class="noise-badge-label">{{ currentNoiseLevelConfig?.label }}</text>
-          <text class="noise-badge-arrow">▾</text>
+      </view>
+      <!-- 地区 Tab 在右侧 -->
+      <view class="region-tabs-inline">
+        <view
+          v-for="r in REGION_CONFIGS"
+          :key="r.key"
+          class="region-tab-inline"
+          :class="{ active: selectedRegion === r.key }"
+          @tap="selectedRegion = r.key"
+        >
+          <text class="region-tab-inline-text">{{ r.label }}</text>
         </view>
       </view>
     </view>
 
-    <!-- 地区 Tab（文字+下划线样式） -->
-    <view class="region-tabs">
-      <view
-        v-for="r in REGION_CONFIGS"
-        :key="r.key"
-        class="region-tab"
-        :class="{ active: selectedRegion === r.key }"
-        @tap="selectedRegion = r.key"
-      >
-        <text class="region-tab-text">{{ r.label }}</text>
-        <view v-if="selectedRegion === r.key" class="region-tab-line" />
+    <!-- 第二行：降噪档位 + 领域胶囊 -->
+    <view class="filter-bar">
+      <view class="noise-badge" @tap="showNoisePicker = true">
+        <text class="noise-badge-icon">{{ currentNoiseLevelConfig?.icon }}</text>
+        <text class="noise-badge-label">{{ currentNoiseLevelConfig?.label }}</text>
+        <text class="noise-badge-arrow">▾</text>
       </view>
+      <scroll-view scroll-x class="domain-tabs-inline" :show-scrollbar="false">
+        <view class="domain-tab-list-inline">
+          <view
+            class="domain-tab"
+            :class="{ active: selectedDomain === 'all' }"
+            @tap="selectedDomain = 'all'"
+          >
+            <text>全部</text>
+          </view>
+          <view
+            v-for="d in subscribedDomains"
+            :key="d.key"
+            class="domain-tab"
+            :class="{ active: selectedDomain === d.key }"
+            :style="selectedDomain === d.key ? { background: d.color, color: '#fff' } : {}"
+            @tap="selectedDomain = d.key"
+          >
+            <text>{{ d.icon ? d.icon + ' ' + d.label : d.label }}</text>
+          </view>
+        </view>
+      </scroll-view>
     </view>
 
-    <!-- 领域胶囊横向滚动 -->
-    <scroll-view scroll-x class="domain-tabs" :show-scrollbar="false">
-      <view class="domain-tab-list">
-        <view
-          class="domain-tab"
-          :class="{ active: selectedDomain === 'all' }"
-          @tap="selectedDomain = 'all'"
-        >
-          <text>全部</text>
-        </view>
-        <view
-          v-for="d in subscribedDomains"
-          :key="d.key"
-          class="domain-tab"
-          :class="{ active: selectedDomain === d.key }"
-          :style="selectedDomain === d.key ? { background: d.color, color: '#fff' } : {}"
-          @tap="selectedDomain = d.key"
-        >
-          <text>{{ d.icon ? d.icon + ' ' + d.label : d.label }}</text>
-        </view>
-      </view>
-    </scroll-view>
+
 
     <!-- 文章列表 -->
     <scroll-view
@@ -218,8 +218,9 @@ async function onRefresh() {
 .nav-bar {
   display: flex;
   align-items: center;
-  padding: 20rpx 32rpx 12rpx;
+  padding: 20rpx 200rpx 20rpx 32rpx;
   background: #fff;
+  border-bottom: 1rpx solid #F0F0F0;
 }
 
 .nav-left {
@@ -278,55 +279,60 @@ async function onRefresh() {
   margin-left: 2rpx;
 }
 
-/* 地区 Tab */
-.region-tabs {
+/* 地区 Tab（内联在导航栏右侧） */
+.region-tabs-inline {
   display: flex;
   align-items: center;
-  padding: 20rpx 32rpx;
-  gap: 48rpx;
-  background: #fff;
-  height: 80rpx;
-  border-bottom: 1rpx solid #F5F5F5;
+  gap: 4rpx;
+  flex-shrink: 0;
 }
 
-.region-tab {
-  position: relative;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.region-tab-inline {
+  padding: 10rpx 20rpx;
+  border-radius: 32rpx;
+  transition: all 0.2s ease;
 }
 
-.region-text {
-  font-size: 30rpx;
+.region-tab-inline.active {
+  background: #F0FDF4;
+}
+
+.region-tab-inline-text {
+  font-size: 26rpx;
   color: #AAAAAA;
   font-weight: 500;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
 }
 
-.region-tab.active .region-text {
-  color: #1A1A1A;
+.region-tab-inline.active .region-tab-inline-text {
+  color: #1DB954;
   font-weight: 700;
 }
 
-/* 领域胶囊 Tab */
-.domain-tabs {
-  background: #fff;
-  white-space: nowrap;
-  border-bottom: 2rpx solid #F0F0F0;
-  height: 112rpx;
+/* 第二行过滤栏：降噪档位 + 领域胶囊 */
+.filter-bar {
   display: flex;
   align-items: center;
+  padding: 16rpx 24rpx 16rpx 32rpx;
+  background: #fff;
+  border-bottom: 1rpx solid #EEEEEE;
+  gap: 16rpx;
 }
 
-.domain-tab-list {
+.domain-tabs-inline {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.domain-tab-list-inline {
   display: flex;
-  padding: 0 32rpx;
-  gap: 20rpx;
+  gap: 16rpx;
+  padding-right: 16rpx;
 }
 
 .domain-tab {
-  padding: 16rpx 32rpx;
+  padding: 14rpx 28rpx;
   border-radius: 40rpx;
   font-size: 26rpx;
   color: #888;
