@@ -1,35 +1,41 @@
 <template>
   <view class="feed-page">
-    <!-- 导航栏： Logo + 地区 Tab（左对齐），右侧留空给胶囊按钮 -->
+    <!-- 第一行：导航栏 — 仅 Logo + 标题，右侧完全留空给胶囊按钮 -->
     <view class="nav-bar">
       <view class="nav-logo-icon">
         <text class="nav-logo">🌊</text>
       </view>
       <text class="nav-title">微澜</text>
-      <!-- 地区 Tab 在 Logo 右侧，用分隔线隔开 -->
-      <view class="nav-divider"></view>
-      <view class="region-tabs-inline">
+    </view>
+
+    <!-- 第二行：地区 Tab + 降噪档位 -->
+    <view class="filter-bar">
+      <!-- 地区 Tab（左侧） -->
+      <view class="region-tabs">
         <view
           v-for="r in REGION_CONFIGS"
           :key="r.key"
-          class="region-tab-inline"
+          class="region-tab"
           :class="{ active: selectedRegion === r.key }"
           @tap="selectedRegion = r.key"
         >
-          <text class="region-tab-inline-text">{{ r.label }}</text>
+          <text class="region-tab-text">{{ r.label }}</text>
         </view>
       </view>
-    </view>
-
-    <!-- 第二行：降噪档位 + 领域胶囊 -->
-    <view class="filter-bar">
+      <!-- 分隔线 -->
+      <view class="filter-divider"></view>
+      <!-- 降噪档位（右侧） -->
       <view class="noise-badge" @tap="showNoisePicker = true">
         <text class="noise-badge-icon">{{ currentNoiseLevelConfig?.icon }}</text>
         <text class="noise-badge-label">{{ currentNoiseLevelConfig?.label }}</text>
         <text class="noise-badge-arrow">▾</text>
       </view>
-      <scroll-view scroll-x class="domain-tabs-inline" :show-scrollbar="false">
-        <view class="domain-tab-list-inline">
+    </view>
+
+    <!-- 第三行：领域 Tab -->
+    <view class="domain-bar">
+      <scroll-view scroll-x class="domain-scroll" :show-scrollbar="false">
+        <view class="domain-tab-list">
           <view
             class="domain-tab"
             :class="{ active: selectedDomain === 'all' }"
@@ -42,7 +48,7 @@
             :key="d.key"
             class="domain-tab"
             :class="{ active: selectedDomain === d.key }"
-            :style="selectedDomain === d.key ? { background: d.color, color: '#fff' } : {}"
+            :style="selectedDomain === d.key ? { background: d.color, color: '#fff', borderColor: d.color } : {}"
             @tap="selectedDomain = d.key"
           >
             <text>{{ d.icon ? d.icon + ' ' + d.label : d.label }}</text>
@@ -50,8 +56,6 @@
         </view>
       </scroll-view>
     </view>
-
-
 
     <!-- 文章列表 -->
     <scroll-view
@@ -213,28 +217,19 @@ async function onRefresh() {
   background: #F5F5F5;
 }
 
-/* 导航栏 */
+/* ── 第一行：导航栏（仅 Logo + 标题） ── */
 .nav-bar {
   display: flex;
   align-items: center;
-  padding: 18rpx 32rpx 18rpx 32rpx;
+  padding: 16rpx 32rpx;
   background: #fff;
-  border-bottom: 1rpx solid #F0F0F0;
   gap: 16rpx;
-}
-
-/* 分隔线 */
-.nav-divider {
-  width: 1.5rpx;
-  height: 32rpx;
-  background: #E0E0E0;
-  flex-shrink: 0;
-  margin: 0 4rpx;
+  /* 右侧不设 padding-right，由胶囊按钮自然占位 */
 }
 
 .nav-logo-icon {
-  width: 48rpx;
-  height: 48rpx;
+  width: 52rpx;
+  height: 52rpx;
   border-radius: 14rpx;
   background: linear-gradient(135deg, #1DB954, #17A348);
   display: flex;
@@ -244,13 +239,63 @@ async function onRefresh() {
 }
 
 .nav-logo {
-  font-size: 28rpx;
+  font-size: 30rpx;
 }
 
 .nav-title {
-  font-size: 34rpx;
+  font-size: 36rpx;
   font-weight: 700;
   color: #111;
+  letter-spacing: 0.02em;
+}
+
+/* ── 第二行：地区 Tab + 降噪档位 ── */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  padding: 14rpx 32rpx;
+  background: #fff;
+  border-bottom: 1.5rpx solid #F0F0F0;
+  gap: 0;
+}
+
+/* 地区 Tab 组 */
+.region-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  flex: 1;
+}
+
+.region-tab {
+  padding: 10rpx 24rpx;
+  border-radius: 32rpx;
+  transition: all 0.2s ease;
+}
+
+.region-tab.active {
+  background: #F0FDF4;
+}
+
+.region-tab-text {
+  font-size: 28rpx;
+  color: #AAAAAA;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.region-tab.active .region-tab-text {
+  color: #1DB954;
+  font-weight: 700;
+}
+
+/* 分隔线 */
+.filter-divider {
+  width: 1.5rpx;
+  height: 32rpx;
+  background: #E8E8E8;
+  flex-shrink: 0;
+  margin: 0 20rpx;
 }
 
 /* 降噪档位标签 */
@@ -258,10 +303,10 @@ async function onRefresh() {
   display: flex;
   align-items: center;
   gap: 6rpx;
-  padding: 6rpx 16rpx;
+  padding: 8rpx 20rpx;
   border-radius: 40rpx;
   background: #F0FDF4;
-  border: 1rpx solid #BBF7D0;
+  border: 1.5rpx solid #BBF7D0;
   flex-shrink: 0;
 }
 
@@ -270,7 +315,7 @@ async function onRefresh() {
 }
 
 .noise-badge-label {
-  font-size: 22rpx;
+  font-size: 24rpx;
   font-weight: 600;
   color: #1DB954;
 }
@@ -281,60 +326,26 @@ async function onRefresh() {
   margin-left: 2rpx;
 }
 
-/* 地区 Tab（内联在导航栏右侧） */
-.region-tabs-inline {
-  display: flex;
-  align-items: center;
-  gap: 4rpx;
-  flex-shrink: 0;
-}
-
-.region-tab-inline {
-  padding: 10rpx 20rpx;
-  border-radius: 32rpx;
-  transition: all 0.2s ease;
-}
-
-.region-tab-inline.active {
-  background: #F0FDF4;
-}
-
-.region-tab-inline-text {
-  font-size: 26rpx;
-  color: #AAAAAA;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.region-tab-inline.active .region-tab-inline-text {
-  color: #1DB954;
-  font-weight: 700;
-}
-
-/* 第二行过滤栏：降噪档位 + 领域胶囊 */
-.filter-bar {
-  display: flex;
-  align-items: center;
-  padding: 16rpx 24rpx 16rpx 32rpx;
+/* ── 第三行：领域 Tab ── */
+.domain-bar {
   background: #fff;
-  border-bottom: 1rpx solid #EEEEEE;
-  gap: 16rpx;
+  border-bottom: 1.5rpx solid #EEEEEE;
+  padding: 12rpx 0 12rpx 24rpx;
 }
 
-.domain-tabs-inline {
-  flex: 1;
+.domain-scroll {
   white-space: nowrap;
   overflow: hidden;
 }
 
-.domain-tab-list-inline {
+.domain-tab-list {
   display: flex;
   gap: 16rpx;
-  padding-right: 16rpx;
+  padding-right: 24rpx;
 }
 
 .domain-tab {
-  padding: 14rpx 28rpx;
+  padding: 12rpx 28rpx;
   border-radius: 40rpx;
   font-size: 26rpx;
   color: #888;
@@ -352,7 +363,7 @@ async function onRefresh() {
   border: 1.5rpx solid #A8E6C0;
 }
 
-/* 文章列表 */
+/* ── 文章列表 ── */
 .article-list {
   flex: 1;
   overflow: hidden;
@@ -369,7 +380,7 @@ async function onRefresh() {
   color: #CCCCCC;
 }
 
-/* 空状态 */
+/* ── 空状态 ── */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -424,7 +435,7 @@ async function onRefresh() {
   font-weight: 500;
 }
 
-/* 降噪选择器 */
+/* ── 降噪选择器弹窗 ── */
 .overlay {
   position: fixed;
   top: 0;
