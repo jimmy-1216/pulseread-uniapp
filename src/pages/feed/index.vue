@@ -49,7 +49,7 @@
           :style="selectedDomain === d.key ? { background: d.color, color: '#fff' } : {}"
           @tap="selectedDomain = d.key"
         >
-          <text>{{ d.icon }} {{ d.label }}</text>
+          <text>{{ d.icon ? d.icon + ' ' + d.label : d.label }}</text>
         </view>
       </view>
     </scroll-view>

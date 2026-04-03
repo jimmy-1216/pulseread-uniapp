@@ -1,10 +1,10 @@
 import type { DomainConfig, NoiseLevelConfig, Article } from './types'
 
 export const DOMAIN_CONFIGS: DomainConfig[] = [
-  { key: 'tech', label: '科技', icon: '💻', description: '前沿技术、AI、芯片、云计算', color: '#1677FF', bgColor: '#E6F4FF' },
-  { key: 'finance', label: '财经', icon: '📈', description: '宏观经济、股市、投融资', color: '#FA8C16', bgColor: '#FFF7E6' },
-  { key: 'policy', label: '政策', icon: '🏛️', description: '监管政策、法律法规、贸易', color: '#52C41A', bgColor: '#F6FFED' },
-  { key: 'commerce', label: '商情', icon: '📋', description: '招投标、商业情报、竞争分析', color: '#EB2F96', bgColor: '#FFF0F6' },
+  { key: 'tech', label: '科技', icon: '', description: '前沿技术、AI、芯片、云计算', color: '#1677FF', bgColor: '#E6F4FF' },
+  { key: 'finance', label: '财经', icon: '', description: '宏观经济、股市、投融资', color: '#FA8C16', bgColor: '#FFF7E6' },
+  { key: 'policy', label: '政策', icon: '', description: '监管政策、法律法规、贸易', color: '#52C41A', bgColor: '#F6FFED' },
+  { key: 'commerce', label: '商情', icon: '', description: '招投标、商业情报、竞争分析', color: '#EB2F96', bgColor: '#FFF0F6' },
 ];
 
 export const NOISE_LEVEL_CONFIGS: NoiseLevelConfig[] = [

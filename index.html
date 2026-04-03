@@ -259,6 +259,29 @@
         #app *::-webkit-scrollbar { display: none; }
         #app * { scrollbar-width: none; -ms-overflow-style: none; }
 
+        /* ── 强制 fixed 定位的遮罩层和抽屉相对于手机框架定位 ── */
+        /* uni-app 的 overlay/drawer 使用 position:fixed，需要改为 absolute */
+        #app .overlay {
+          position: absolute !important;
+          inset: 0 !important;
+          z-index: 9990 !important;
+        }
+        #app .drawer {
+          position: absolute !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          z-index: 9991 !important;
+        }
+        /* article 页面的 AI 抽屉 */
+        #app .ai-drawer {
+          position: absolute !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          z-index: 9991 !important;
+        }
+
         /* ── 右侧说明文字（超宽屏可见） ── */
         .phone-info {
           position: fixed;
@@ -375,13 +398,63 @@
         // 2. 状态栏高度 = 44px（微信小程序规范刘海屏）
         var STATUS_BAR_H = 52;
 
-        // 3. 注入 nav-bar padding-top（避开状态栏）
-        // uni-app 编译后 .nav-bar 有 scoped 属性，用 MutationObserver + inline style 强制覆盖
+        // 3. 注入顶部容器 padding-top（避开状态栏）
+        // 覆盖所有页面的顶部容器：.nav-bar / .search-bar / .green-header
+        // uni-app 编译后有 scoped 属性，用 inline style + !important 强制覆盖
+        var CAPSULE_RIGHT_SPACE = '104px'; // 胶囊按鈕宽度 87px + 右边距 7px + 间距 10px
         function applyNavBarFix() {
-          var navBars = document.querySelectorAll('.nav-bar');
-          navBars.forEach(function(el) {
+          // .nav-bar：feed/article/preference 页面
+          document.querySelectorAll('.nav-bar').forEach(function(el) {
             el.style.setProperty('padding-top', STATUS_BAR_H + 'px', 'important');
           });
+          // .search-bar：搜索页顶部搜索栏，需要额外留出胶囊宽度
+          document.querySelectorAll('.search-bar').forEach(function(el) {
+            el.style.setProperty('padding-top', STATUS_BAR_H + 'px', 'important');
+            el.style.setProperty('padding-right', CAPSULE_RIGHT_SPACE, 'important');
+          });
+          // .green-header：个人中心页绿色头部，需要额外留出胶囊宽度
+          document.querySelectorAll('.green-header').forEach(function(el) {
+            el.style.setProperty('padding-top', STATUS_BAR_H + 'px', 'important');
+            el.style.setProperty('padding-right', CAPSULE_RIGHT_SPACE, 'important');
+          });
+          // 动态调整状态栏背景色（个人中心页状态栏应为透明/绿色）
+          var statusBar = document.getElementById('mp-status-bar');
+          if (statusBar) {
+            var greenHeader = document.querySelector('.green-header');
+            if (greenHeader) {
+              statusBar.style.background = 'transparent';
+              statusBar.style.setProperty('--mp-time-color', '#fff');
+              // 状态栏文字和图标改为白色
+              var timeEl = statusBar.querySelector('.mp-time');
+              if (timeEl) timeEl.style.color = '#fff';
+              var svgs = statusBar.querySelectorAll('svg');
+              svgs.forEach(function(svg) {
+                svg.querySelectorAll('[fill="#1a1a1a"]').forEach(function(el) { el.setAttribute('fill', '#fff'); });
+                svg.querySelectorAll('[stroke="#1a1a1a"]').forEach(function(el) { el.setAttribute('stroke', '#fff'); });
+              });
+            } else {
+              statusBar.style.background = '#fff';
+              var timeEl = statusBar.querySelector('.mp-time');
+              if (timeEl) timeEl.style.color = '#1a1a1a';
+              var svgs = statusBar.querySelectorAll('svg');
+              svgs.forEach(function(svg) {
+                svg.querySelectorAll('[fill="#fff"]').forEach(function(el) { el.setAttribute('fill', '#1a1a1a'); });
+                svg.querySelectorAll('[stroke="#fff"]').forEach(function(el) { el.setAttribute('stroke', '#1a1a1a'); });
+              });
+            }
+          }
+          // 胶囊按鈕颜色同步调整
+          var capsule = document.querySelector('.mp-capsule');
+          if (capsule) {
+            var greenHeader2 = document.querySelector('.green-header');
+            if (greenHeader2) {
+              capsule.style.background = 'rgba(255,255,255,0.25)';
+              capsule.style.borderColor = 'rgba(255,255,255,0.3)';
+            } else {
+              capsule.style.background = 'rgba(255,255,255,0.9)';
+              capsule.style.borderColor = 'rgba(0,0,0,0.12)';
+            }
+          }
         }
 
         // 4. MutationObserver 监听 DOM 变化
