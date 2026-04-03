@@ -1,0 +1,91 @@
+{
+  "pages": [
+    {
+      "path": "pages/onboarding/index",
+      "style": {
+        "navigationBarTitleText": "欢迎使用微澜",
+        "navigationStyle": "custom",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    {
+      "path": "pages/feed/index",
+      "style": {
+        "navigationBarTitleText": "微澜",
+        "navigationStyle": "custom",
+        "backgroundColor": "#F5F5F5"
+      }
+    },
+    {
+      "path": "pages/search/index",
+      "style": {
+        "navigationBarTitleText": "搜索",
+        "navigationStyle": "custom",
+        "backgroundColor": "#F5F5F5"
+      }
+    },
+    {
+      "path": "pages/preference/index",
+      "style": {
+        "navigationBarTitleText": "偏好设置",
+        "navigationStyle": "custom",
+        "backgroundColor": "#F5F5F5"
+      }
+    },
+    {
+      "path": "pages/profile/index",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "navigationStyle": "custom",
+        "backgroundColor": "#F5F5F5"
+      }
+    },
+    {
+      "path": "pages/article/index",
+      "style": {
+        "navigationBarTitleText": "资讯详情",
+        "navigationStyle": "custom",
+        "backgroundColor": "#FFFFFF"
+      }
+    }
+  ],
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#1DB954",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/feed/index",
+        "text": "资讯",
+        "iconPath": "static/tab-feed.png",
+        "selectedIconPath": "static/tab-feed-active.png"
+      },
+      {
+        "pagePath": "pages/search/index",
+        "text": "搜索",
+        "iconPath": "static/tab-search.png",
+        "selectedIconPath": "static/tab-search-active.png"
+      },
+      {
+        "pagePath": "pages/preference/index",
+        "text": "偏好",
+        "iconPath": "static/tab-pref.png",
+        "selectedIconPath": "static/tab-pref-active.png"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的",
+        "iconPath": "static/tab-profile.png",
+        "selectedIconPath": "static/tab-profile-active.png"
+      }
+    ]
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "微澜 PulseRead",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "backgroundColor": "#F5F5F5",
+    "backgroundTextStyle": "light"
+  }
+}
