@@ -218,9 +218,8 @@ async function onRefresh() {
 .nav-bar {
   display: flex;
   align-items: center;
-  padding: 8rpx 24rpx;
+  padding: 16rpx 32rpx;
   background: #fff;
-  border-bottom: 1rpx solid #F0F0F0;
 }
 
 .nav-left {
@@ -283,11 +282,10 @@ async function onRefresh() {
 .region-tabs {
   display: flex;
   align-items: center;
-  padding: 0 24rpx;
-  gap: 28rpx;
+  padding: 0 32rpx;
+  gap: 40rpx;
   background: #fff;
-  height: 56rpx;
-  border-bottom: 1rpx solid #F0F0F0;
+  height: 72rpx;
 }
 
 .region-tab {
@@ -323,26 +321,28 @@ async function onRefresh() {
 .domain-tabs {
   background: #fff;
   white-space: nowrap;
-  border-bottom: 1rpx solid #F5F5F5;
-  height: 60rpx;
+  border-bottom: 1rpx solid #F0F0F0;
+  height: 88rpx;
   display: flex;
   align-items: center;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.03);
 }
 
 .domain-tab-list {
   display: flex;
-  padding: 0 24rpx;
-  gap: 6rpx;
+  padding: 0 32rpx;
+  gap: 16rpx;
 }
 
 .domain-tab {
-  padding: 6rpx 18rpx;
-  border-radius: 40rpx;
-  font-size: 22rpx;
+  padding: 10rpx 24rpx;
+  border-radius: 30rpx;
+  font-size: 24rpx;
   color: #666;
-  background: #F0F0F0;
+  background: #F5F5F5;
   white-space: nowrap;
   flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
 .domain-tab.active {
