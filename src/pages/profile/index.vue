@@ -14,10 +14,12 @@
               <text class="member-text">{{ memberLabel }}</text>
             </view>
           </view>
-          <text class="user-id">ID: {{ store.userInfo.id }}</text>
-        </view>
-        <view class="edit-btn" @tap="showDrawer('upgrade')">
-          <text class="edit-btn-text">编辑资料</text>
+          <view class="user-id-row">
+            <text class="user-id">ID: {{ store.userInfo.id }}</text>
+            <view class="edit-btn" @tap="showDrawer('upgrade')">
+              <text class="edit-btn-text">编辑资料</text>
+            </view>
+          </view>
         </view>
       </view>
 
@@ -583,14 +585,16 @@ function confirmReset() {
 .profile-page {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   background: #F5F5F5;
+  position: relative;
+  overflow: hidden;
 }
 
 /* ── 绿色渐变头部 ── */
 .green-header {
   background: linear-gradient(160deg, #1DB954 0%, #17A348 100%);
-  padding: 40rpx 32rpx 32rpx;
+  padding: 40rpx 110rpx 32rpx 32rpx;
 }
 
 .user-row {
@@ -613,19 +617,25 @@ function confirmReset() {
 
 .avatar-emoji { font-size: 56rpx; }
 
-.user-info { flex: 1; }
+.user-info { flex: 1; min-width: 0; }
 
 .name-row {
   display: flex;
   align-items: center;
-  gap: 12rpx;
+  gap: 10rpx;
   margin-bottom: 8rpx;
+  flex-wrap: nowrap;
 }
 
 .user-name {
-  font-size: 36rpx;
+  font-size: 32rpx;
   font-weight: 700;
   color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .member-badge {
@@ -642,20 +652,27 @@ function confirmReset() {
   color: #1DB954;
 }
 
+.user-id-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
 .user-id {
   font-size: 24rpx;
   color: rgba(255, 255, 255, 0.75);
 }
 
 .edit-btn {
-  padding: 12rpx 28rpx;
+  padding: 10rpx 22rpx;
   border-radius: 40rpx;
   border: 2rpx solid rgba(255, 255, 255, 0.7);
   flex-shrink: 0;
 }
 
 .edit-btn-text {
-  font-size: 26rpx;
+  font-size: 24rpx;
   color: #fff;
   font-weight: 500;
 }
@@ -821,7 +838,7 @@ function confirmReset() {
    抽屉系统（统一动效）
 ═══════════════════════════════════════════════════════ */
 .overlay {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
@@ -847,7 +864,7 @@ function confirmReset() {
   right: 0;
   background: #F5F7FA;
   border-radius: 40rpx 40rpx 0 0;
-  max-height: 75vh;
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
   transform: translateY(100%);

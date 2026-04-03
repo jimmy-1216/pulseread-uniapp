@@ -259,8 +259,8 @@
         #app *::-webkit-scrollbar { display: none; }
         #app * { scrollbar-width: none; -ms-overflow-style: none; }
 
-        /* ── 强制 fixed 定位的遮罩层和抽屉相对于手机框架定位 ── */
-        /* uni-app 的 overlay/drawer 使用 position:fixed，需要改为 absolute */
+        /* ── 遮罩层和抽屉定位修复 ── */
+        /* overlay 使用 position: absolute 相对于页面根元素定位，确保覆盖整个页面 */
         #app .overlay {
           position: absolute !important;
           inset: 0 !important;
@@ -412,10 +412,9 @@
             el.style.setProperty('padding-top', STATUS_BAR_H + 'px', 'important');
             el.style.setProperty('padding-right', CAPSULE_RIGHT_SPACE, 'important');
           });
-          // .green-header：个人中心页绿色头部，需要额外留出胶囊宽度
+          // .green-header：个人中心页绿色头部，只注入 padding-top，右侧 padding 保持原始值
           document.querySelectorAll('.green-header').forEach(function(el) {
             el.style.setProperty('padding-top', STATUS_BAR_H + 'px', 'important');
-            el.style.setProperty('padding-right', CAPSULE_RIGHT_SPACE, 'important');
           });
           // 动态调整状态栏背景色（个人中心页状态栏应为透明/绿色）
           var statusBar = document.getElementById('mp-status-bar');
