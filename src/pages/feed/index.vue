@@ -282,10 +282,11 @@ async function onRefresh() {
 .region-tabs {
   display: flex;
   align-items: center;
-  padding: 12rpx 32rpx 0;
+  padding: 20rpx 32rpx;
   gap: 48rpx;
   background: #fff;
-  height: 64rpx;
+  height: 80rpx;
+  border-bottom: 1rpx solid #F5F5F5;
 }
 
 .region-tab {
@@ -298,51 +299,49 @@ async function onRefresh() {
 
 .region-text {
   font-size: 30rpx;
-  color: #999;
+  color: #AAAAAA;
   font-weight: 500;
   transition: all 0.25s ease;
 }
 
 .region-tab.active .region-text {
-  color: #1DB954;
-  font-weight: 800;
-  transform: scale(1.05);
+  color: #1A1A1A;
+  font-weight: 700;
 }
 
 /* 领域胶囊 Tab */
 .domain-tabs {
   background: #fff;
   white-space: nowrap;
-  border-bottom: 1rpx solid #F2F2F2;
-  height: 104rpx;
+  border-bottom: 2rpx solid #F0F0F0;
+  height: 112rpx;
   display: flex;
   align-items: center;
-  margin-top: 8rpx;
 }
 
 .domain-tab-list {
   display: flex;
   padding: 0 32rpx;
-  gap: 24rpx;
+  gap: 20rpx;
 }
 
 .domain-tab {
-  padding: 14rpx 32rpx;
+  padding: 16rpx 32rpx;
   border-radius: 40rpx;
   font-size: 26rpx;
-  color: #666;
-  background: #F8F8F8;
+  color: #888;
+  background: #F5F5F5;
   white-space: nowrap;
   flex-shrink: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1rpx solid transparent;
+  border: 1.5rpx solid transparent;
 }
 
 .domain-tab.active {
-  background: rgba(29, 185, 84, 0.08);
+  background: #E8F8EE;
   color: #1DB954;
   font-weight: 600;
-  border: 1rpx solid rgba(29, 185, 84, 0.15);
+  border: 1.5rpx solid #A8E6C0;
 }
 
 /* 文章列表 */
