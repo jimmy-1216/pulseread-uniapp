@@ -143,7 +143,8 @@
           background: #fff;
           display: flex;
           align-items: flex-end;
-          padding: 0 16px 6px;
+          justify-content: space-between;
+          padding: 0 104px 6px 16px;
           z-index: 9999;
           pointer-events: none;
         }
@@ -152,13 +153,19 @@
           font-weight: 600;
           color: #1a1a1a;
           letter-spacing: 0.02em;
+          line-height: 1;
         }
         .mp-status-bar .mp-icons {
-          margin-left: auto;
           display: flex;
           align-items: center;
+          justify-content: flex-end;
           gap: 6px;
-          padding-right: 100px; /* 留出胶囊宽度 */
+          flex-shrink: 0;
+          line-height: 1;
+        }
+        .mp-status-bar .mp-icons svg {
+          display: block;
+          flex-shrink: 0;
         }
 
         /* ── 右上角胶囊按钮 ── */
@@ -396,64 +403,51 @@
         setInterval(updateTime, 10000);
 
         // 2. 状态栏高度 = 44px（微信小程序规范刘海屏）
-        var STATUS_BAR_H = 52;
+        var STATUS_BAR_H = 50;
 
         // 3. 注入顶部容器 padding-top（避开状态栏）
         // 覆盖所有页面的顶部容器：.nav-bar / .search-bar / .green-header
         // uni-app 编译后有 scoped 属性，用 inline style + !important 强制覆盖
-        var CAPSULE_RIGHT_SPACE = '104px'; // 胶囊按鈕宽度 87px + 右边距 7px + 间距 10px
+        var CAPSULE_RIGHT_SPACE = '104px'; // 胶囊按钮宽度 87px + 右边距 7px + 预留间距
         function applyNavBarFix() {
           // .nav-bar：feed/article/preference 页面
           document.querySelectorAll('.nav-bar').forEach(function(el) {
             el.style.setProperty('padding-top', STATUS_BAR_H + 'px', 'important');
             el.style.setProperty('padding-right', CAPSULE_RIGHT_SPACE, 'important');
+            el.style.setProperty('min-height', '96px', 'important');
           });
           // .search-bar：搜索页顶部搜索栏，需要额外留出胶囊宽度
           document.querySelectorAll('.search-bar').forEach(function(el) {
             el.style.setProperty('padding-top', STATUS_BAR_H + 'px', 'important');
             el.style.setProperty('padding-right', CAPSULE_RIGHT_SPACE, 'important');
+            el.style.setProperty('min-height', '94px', 'important');
           });
-          // .green-header：个人中心页绿色头部，只注入 padding-top，右侧 padding 保持原始值
-          document.querySelectorAll('.green-header').forEach(function(el) {
+          // 个人中心头部容器：旧版 .green-header 与新版 .profile-header 都需要注入顶部安全区
+          document.querySelectorAll('.green-header, .profile-header').forEach(function(el) {
             el.style.setProperty('padding-top', STATUS_BAR_H + 'px', 'important');
+            el.style.setProperty('margin-top', '16px', 'important');
           });
-          // 动态调整状态栏背景色（个人中心页状态栏应为透明/绿色）
+          // 偏好/搜索等顶部壳层在某些页面也需要补齐安全区，避免内容顶到状态栏下方
+          document.querySelectorAll('.top-shell, .search-shell').forEach(function(el) {
+            el.style.setProperty('padding-top', '8px', 'important');
+          });
+          // 动态调整状态栏背景色（个人中心页顶部为浅色卡片，因此保持白底深色图标）
           var statusBar = document.getElementById('mp-status-bar');
           if (statusBar) {
-            var greenHeader = document.querySelector('.green-header');
-            if (greenHeader) {
-              statusBar.style.background = 'transparent';
-              statusBar.style.setProperty('--mp-time-color', '#fff');
-              // 状态栏文字和图标改为白色
-              var timeEl = statusBar.querySelector('.mp-time');
-              if (timeEl) timeEl.style.color = '#fff';
-              var svgs = statusBar.querySelectorAll('svg');
-              svgs.forEach(function(svg) {
-                svg.querySelectorAll('[fill="#1a1a1a"]').forEach(function(el) { el.setAttribute('fill', '#fff'); });
-                svg.querySelectorAll('[stroke="#1a1a1a"]').forEach(function(el) { el.setAttribute('stroke', '#fff'); });
-              });
-            } else {
-              statusBar.style.background = '#fff';
-              var timeEl = statusBar.querySelector('.mp-time');
-              if (timeEl) timeEl.style.color = '#1a1a1a';
-              var svgs = statusBar.querySelectorAll('svg');
-              svgs.forEach(function(svg) {
-                svg.querySelectorAll('[fill="#fff"]').forEach(function(el) { el.setAttribute('fill', '#1a1a1a'); });
-                svg.querySelectorAll('[stroke="#fff"]').forEach(function(el) { el.setAttribute('stroke', '#1a1a1a'); });
-              });
-            }
+            statusBar.style.background = '#fff';
+            var timeEl = statusBar.querySelector('.mp-time');
+            if (timeEl) timeEl.style.color = '#1a1a1a';
+            var svgs = statusBar.querySelectorAll('svg');
+            svgs.forEach(function(svg) {
+              svg.querySelectorAll('[fill="#fff"]').forEach(function(el) { el.setAttribute('fill', '#1a1a1a'); });
+              svg.querySelectorAll('[stroke="#fff"]').forEach(function(el) { el.setAttribute('stroke', '#1a1a1a'); });
+            });
           }
-          // 胶囊按鈕颜色同步调整
+          // 胶囊按钮始终保持浅色半透明，以避免与页面内容叠加后产生脏边感
           var capsule = document.querySelector('.mp-capsule');
           if (capsule) {
-            var greenHeader2 = document.querySelector('.green-header');
-            if (greenHeader2) {
-              capsule.style.background = 'rgba(255,255,255,0.25)';
-              capsule.style.borderColor = 'rgba(255,255,255,0.3)';
-            } else {
-              capsule.style.background = 'rgba(255,255,255,0.9)';
-              capsule.style.borderColor = 'rgba(0,0,0,0.12)';
-            }
+            capsule.style.background = 'rgba(255,255,255,0.9)';
+            capsule.style.borderColor = 'rgba(0,0,0,0.12)';
           }
         }
 

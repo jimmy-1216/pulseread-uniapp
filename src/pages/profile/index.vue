@@ -1,46 +1,38 @@
 <template>
-  <view class="profile-page">
-    <!-- 绿色渐变头部（用户信息 + 统计） -->
-    <view class="green-header">
-      <!-- 用户信息行 -->
+  <view class="profile-page" :class="{ 'drawer-active-page': activeDrawer !== '' }">
+    <view class="profile-header">
       <view class="user-row">
         <view class="avatar-wrap">
-          <text class="avatar-emoji">🌊</text>
+          <text class="avatar-text">澜</text>
         </view>
         <view class="user-info">
           <view class="name-row">
             <text class="user-name">{{ store.userInfo.nickname }}</text>
-            <view class="member-badge">
-              <text class="member-text">{{ memberLabel }}</text>
+            <view class="member-badge" :style="{ background: memberMeta.bg, color: memberMeta.color }">
+              <text class="member-text">{{ memberMeta.label }}</text>
             </view>
           </view>
-          <view class="user-id-row">
-            <text class="user-id">ID: {{ store.userInfo.id }}</text>
-          </view>
+          <text class="user-id">账号 ID：{{ store.userInfo.id }}</text>
+          <text class="user-note">你的阅读记录、收藏与雷达词都在这里集中管理</text>
         </view>
-        <!-- 编辑资料移出 flex 布局，使用绝对定位 -->
-        <view class="edit-btn-absolute" @tap="showDrawer('upgrade')">
-          <text class="edit-btn-text">编辑资料</text>
+        <view class="benefit-btn" @tap="openDrawer('upgrade')">
+          <text class="benefit-btn-text">会员权益</text>
         </view>
       </view>
 
-      <!-- 统计数据行 -->
       <view class="stats-row">
         <view class="stat-item" @tap="openDrawer('history')">
           <text class="stat-num">{{ store.userInfo.readCount }}</text>
-          <text class="stat-label">已阅读</text>
+          <text class="stat-label">阅读</text>
         </view>
-        <view class="stat-divider" />
         <view class="stat-item" @tap="openDrawer('collect')">
           <text class="stat-num">{{ store.collectedArticles.length }}</text>
-          <text class="stat-label">已收藏</text>
+          <text class="stat-label">收藏</text>
         </view>
-        <view class="stat-divider" />
         <view class="stat-item" @tap="openDrawer('liked')">
           <text class="stat-num">{{ store.likedArticles.length }}</text>
-          <text class="stat-label">已点赞</text>
+          <text class="stat-label">点赞</text>
         </view>
-        <view class="stat-divider" />
         <view class="stat-item" @tap="openDrawer('radar')">
           <text class="stat-num">{{ store.preference.radarWords.length }}</text>
           <text class="stat-label">雷达词</text>
@@ -48,28 +40,22 @@
       </view>
     </view>
 
-    <!-- 升级 Pro 卡片 -->
     <view v-if="store.userInfo.memberLevel === 'free'" class="upgrade-card" @tap="openDrawer('upgrade')">
-      <view class="upgrade-left">
-        <text class="upgrade-crown">👑</text>
-        <view>
-          <text class="upgrade-title">升级 Pro，解锁全部功能</text>
-          <text class="upgrade-desc">无限雷达词 · 企业情报 · 数据报告</text>
-        </view>
+      <view class="upgrade-copy">
+        <text class="upgrade-title">升级会员，获得更完整的行业跟踪能力</text>
+        <text class="upgrade-desc">支持更多雷达词、企业情报与阅读周报等高级能力</text>
       </view>
-      <view class="upgrade-btn">
-        <text class="upgrade-btn-text">升级</text>
+      <view class="upgrade-cta">
+        <text>查看</text>
       </view>
     </view>
 
-    <!-- 功能菜单 -->
-    <scroll-view scroll-y class="menu-scroll">
-      <!-- 我的内容 -->
+    <scroll-view scroll-y class="menu-scroll" :class="{ 'menu-scroll-muted': activeDrawer !== '' }">
       <view class="menu-group">
-        <text class="menu-group-title">我的内容</text>
+        <text class="menu-group-title">常用内容</text>
         <view class="menu-card">
           <view class="menu-item" @tap="openDrawer('collect')">
-            <text class="menu-icon">⭐</text>
+            <view class="menu-icon-wrap blue"><text class="menu-icon-text">藏</text></view>
             <view class="menu-label-wrap">
               <text class="menu-label">我的收藏</text>
               <text class="menu-sub">已收藏 {{ store.collectedArticles.length }} 篇资讯</text>
@@ -78,7 +64,7 @@
           </view>
           <view class="menu-divider" />
           <view class="menu-item" @tap="openDrawer('history')">
-            <text class="menu-icon">📖</text>
+            <view class="menu-icon-wrap green"><text class="menu-icon-text">读</text></view>
             <view class="menu-label-wrap">
               <text class="menu-label">阅读历史</text>
               <text class="menu-sub">最近浏览记录</text>
@@ -87,7 +73,7 @@
           </view>
           <view class="menu-divider" />
           <view class="menu-item" @tap="openDrawer('notification')">
-            <text class="menu-icon">🔔</text>
+            <view class="menu-icon-wrap orange"><text class="menu-icon-text">铃</text></view>
             <view class="menu-label-wrap">
               <text class="menu-label">消息通知</text>
               <text class="menu-sub">雷达词触发提醒</text>
@@ -96,7 +82,7 @@
           </view>
           <view class="menu-divider" />
           <view class="menu-item" @tap="openDrawer('report')">
-            <text class="menu-icon">📊</text>
+            <view class="menu-icon-wrap purple"><text class="menu-icon-text">报</text></view>
             <view class="menu-label-wrap">
               <text class="menu-label">数据报告</text>
               <text class="menu-sub">每周阅读分析</text>
@@ -106,12 +92,11 @@
         </view>
       </view>
 
-      <!-- 设置 -->
       <view class="menu-group">
-        <text class="menu-group-title">设置</text>
+        <text class="menu-group-title">偏好与支持</text>
         <view class="menu-card">
-          <view class="menu-item" @tap="goPreference">
-            <text class="menu-icon">🎯</text>
+          <view class="menu-item" @tap="goPreference()">
+            <view class="menu-icon-wrap emerald"><text class="menu-icon-text">偏</text></view>
             <view class="menu-label-wrap">
               <text class="menu-label">偏好设置</text>
               <text class="menu-sub">领域、降噪、雷达词</text>
@@ -120,7 +105,7 @@
           </view>
           <view class="menu-divider" />
           <view class="menu-item" @tap="openDrawer('privacy')">
-            <text class="menu-icon">🔒</text>
+            <view class="menu-icon-wrap gray"><text class="menu-icon-text">隐</text></view>
             <view class="menu-label-wrap">
               <text class="menu-label">隐私设置</text>
             </view>
@@ -128,7 +113,7 @@
           </view>
           <view class="menu-divider" />
           <view class="menu-item" @tap="openDrawer('feedback')">
-            <text class="menu-icon">💬</text>
+            <view class="menu-icon-wrap blue"><text class="menu-icon-text">反</text></view>
             <view class="menu-label-wrap">
               <text class="menu-label">意见反馈</text>
             </view>
@@ -136,7 +121,7 @@
           </view>
           <view class="menu-divider" />
           <view class="menu-item" @tap="openDrawer('help')">
-            <text class="menu-icon">❓</text>
+            <view class="menu-icon-wrap gray"><text class="menu-icon-text">帮</text></view>
             <view class="menu-label-wrap">
               <text class="menu-label">帮助中心</text>
             </view>
@@ -145,11 +130,11 @@
         </view>
       </view>
 
-      <!-- 重置引导 -->
       <view class="menu-group">
+        <text class="menu-group-title">其他</text>
         <view class="menu-card">
           <view class="menu-item" @tap="confirmReset">
-            <text class="menu-icon">🔄</text>
+            <view class="menu-icon-wrap red"><text class="menu-icon-text">重</text></view>
             <view class="menu-label-wrap">
               <text class="menu-label danger-label">重新引导设置</text>
             </view>
@@ -161,295 +146,201 @@
       <view class="bottom-pad" />
     </scroll-view>
 
-    <!-- ═══════════════════════════════════════════════════════
-         统一抽屉容器（所有抽屉共用遮罩 + 动画）
-    ═══════════════════════════════════════════════════════ -->
     <view
       v-show="activeDrawer !== ''"
       class="overlay"
       :class="{ 'overlay-visible': drawerVisible }"
       @tap="closeDrawer"
     >
-      <!-- ── 我的收藏 ── -->
       <view
-        v-show="activeDrawer === 'collect'"
-        class="drawer"
-        :class="{ 'drawer-open': drawerVisible && activeDrawer === 'collect' }"
+        v-if="['collect','history','liked','radar','notification','report'].includes(activeDrawer)"
+        class="drawer list-drawer"
+        :class="{ 'drawer-open': drawerVisible }"
         @tap.stop
       >
         <view class="drawer-handle" />
         <view class="drawer-header">
-          <text class="drawer-title">我的收藏</text>
+          <text class="drawer-title">{{ drawerTitle }}</text>
           <view class="drawer-close-btn" @tap="closeDrawer">
-            <svg-close />
+            <text>×</text>
           </view>
         </view>
-        <scroll-view scroll-y class="drawer-scroll">
-          <view class="drawer-body">
-            <view v-if="store.collectedArticles.length === 0" class="drawer-empty">
-              <text class="drawer-empty-icon">⭐</text>
-              <text class="drawer-empty-title">还没有收藏的资讯</text>
-              <text class="drawer-empty-sub">在文章详情页点击收藏星标</text>
-            </view>
-            <view v-else class="article-card-list">
-              <view
-                v-for="a in store.collectedArticles"
-                :key="a.id"
-                class="article-card"
-                @tap="openArticle(a.id, 'collect')"
-              >
-                <text class="article-card-title">{{ a.title }}</text>
-                <view class="article-card-meta">
-                  <text class="meta-source">{{ a.source }}</text>
-                  <text class="meta-dot">·</text>
-                  <text class="meta-time">{{ a.publishTime }}</text>
-                  <text class="meta-tag collected">⭐ 已收藏</text>
-                </view>
-              </view>
-            </view>
-          </view>
-        </scroll-view>
-      </view>
 
-      <!-- ── 阅读历史 ── -->
-      <view
-        v-show="activeDrawer === 'history'"
-        class="drawer"
-        :class="{ 'drawer-open': drawerVisible && activeDrawer === 'history' }"
-        @tap.stop
-      >
-        <view class="drawer-handle" />
-        <view class="drawer-header">
-          <text class="drawer-title">阅读历史</text>
-          <view class="drawer-close-btn" @tap="closeDrawer">
-            <svg-close />
-          </view>
-        </view>
         <scroll-view scroll-y class="drawer-scroll">
           <view class="drawer-body">
-            <view v-if="historyArticles.length === 0" class="drawer-empty">
-              <text class="drawer-empty-icon">📖</text>
-              <text class="drawer-empty-title">暂无阅读记录</text>
-              <text class="drawer-empty-sub">点击资讯卡片开始阅读</text>
-            </view>
-            <view v-else class="article-card-list">
-              <view
-                v-for="(a, i) in historyArticles"
-                :key="`${a.id}-${i}`"
-                class="article-card"
-                @tap="openArticle(a.id, 'history')"
-              >
-                <text class="article-card-title">{{ a.title }}</text>
-                <view class="article-card-meta">
-                  <text class="meta-source">{{ a.source }}</text>
-                  <text class="meta-dot">·</text>
-                  <text class="meta-time">{{ a.publishTime }}</text>
-                  <text class="meta-tag read">📖 已读</text>
-                </view>
+            <template v-if="activeDrawer === 'collect'">
+              <view v-if="store.collectedArticles.length === 0" class="drawer-empty">
+                <text class="drawer-empty-title">还没有收藏的资讯</text>
+                <text class="drawer-empty-sub">在文章详情页点击收藏即可稍后回看</text>
               </view>
-            </view>
-          </view>
-        </scroll-view>
-      </view>
-
-      <!-- ── 我的点赞 ── -->
-      <view
-        v-show="activeDrawer === 'liked'"
-        class="drawer"
-        :class="{ 'drawer-open': drawerVisible && activeDrawer === 'liked' }"
-        @tap.stop
-      >
-        <view class="drawer-handle" />
-        <view class="drawer-header">
-          <text class="drawer-title">我的点赞</text>
-          <view class="drawer-close-btn" @tap="closeDrawer">
-            <svg-close />
-          </view>
-        </view>
-        <scroll-view scroll-y class="drawer-scroll">
-          <view class="drawer-body">
-            <view v-if="store.likedArticles.length === 0" class="drawer-empty">
-              <text class="drawer-empty-icon">👍</text>
-              <text class="drawer-empty-title">还没有点赞任何文章</text>
-              <text class="drawer-empty-sub">在文章详情页点击点赞</text>
-            </view>
-            <view v-else class="article-card-list">
-              <view
-                v-for="a in store.likedArticles"
-                :key="a.id"
-                class="article-card"
-                @tap="openArticle(a.id, 'liked')"
-              >
-                <text class="article-card-title">{{ a.title }}</text>
-                <view class="article-card-meta">
-                  <text class="meta-source">{{ a.source }}</text>
-                  <text class="meta-dot">·</text>
-                  <text class="meta-time">{{ a.publishTime }}</text>
-                  <text class="meta-tag liked">👍 已赞</text>
-                </view>
-              </view>
-            </view>
-          </view>
-        </scroll-view>
-      </view>
-
-      <!-- ── 我的雷达词 ── -->
-      <view
-        v-show="activeDrawer === 'radar'"
-        class="drawer"
-        :class="{ 'drawer-open': drawerVisible && activeDrawer === 'radar' }"
-        @tap.stop
-      >
-        <view class="drawer-handle" />
-        <view class="drawer-header">
-          <text class="drawer-title">我的雷达词</text>
-          <view class="drawer-close-btn" @tap="closeDrawer">
-            <svg-close />
-          </view>
-        </view>
-        <scroll-view scroll-y class="drawer-scroll">
-          <view class="drawer-body">
-            <view v-if="store.preference.radarWords.length === 0" class="drawer-empty">
-              <text class="drawer-empty-icon">📡</text>
-              <text class="drawer-empty-title">还没有设置雷达词</text>
-              <text class="drawer-empty-sub">去偏好设置添加关注的关键词</text>
-              <view class="drawer-action-btn" @tap="goPreference"><text>前往设置</text></view>
-            </view>
-            <view v-else class="radar-content">
-              <view class="info-card">
-                <text class="info-card-label">当前雷达词</text>
-                <view class="radar-chips">
-                  <view v-for="word in store.preference.radarWords" :key="word" class="radar-chip">
-                    <text>📡 {{ word }}</text>
+              <view v-else class="article-card-list">
+                <view
+                  v-for="a in store.collectedArticles"
+                  :key="a.id"
+                  class="mini-article-card"
+                  @tap="openArticle(a.id)"
+                >
+                  <text class="mini-article-title">{{ a.title }}</text>
+                  <view class="mini-article-meta">
+                    <text class="meta-source">{{ a.source }}</text>
+                    <text class="meta-dot">·</text>
+                    <text class="meta-time">{{ a.publishTime }}</text>
+                    <text class="meta-tag orange">已收藏</text>
                   </view>
                 </view>
               </view>
-              <view class="info-card">
-                <text class="info-card-label">触发统计</text>
-                <text class="info-card-text">本周共触发 <text class="highlight-text">12 次</text>雷达词推送，为您精准捕获关键资讯。</text>
-              </view>
-              <view class="drawer-action-btn" @tap="goPreference"><text>管理雷达词</text></view>
-            </view>
-          </view>
-        </scroll-view>
-      </view>
+            </template>
 
-      <!-- ── 消息通知 ── -->
-      <view
-        v-show="activeDrawer === 'notification'"
-        class="drawer"
-        :class="{ 'drawer-open': drawerVisible && activeDrawer === 'notification' }"
-        @tap.stop
-      >
-        <view class="drawer-handle" />
-        <view class="drawer-header">
-          <text class="drawer-title">消息通知</text>
-          <view class="drawer-close-btn" @tap="closeDrawer">
-            <svg-close />
-          </view>
-        </view>
-        <scroll-view scroll-y class="drawer-scroll">
-          <view class="drawer-body">
-            <view v-if="store.preference.radarWords.length === 0" class="drawer-empty">
-              <text class="drawer-empty-icon">🔔</text>
-              <text class="drawer-empty-title">暂无通知</text>
-              <text class="drawer-empty-sub">设置雷达词后，系统将自动推送相关资讯</text>
-            </view>
-            <view v-else class="article-card-list">
-              <view
-                v-for="(word, i) in store.preference.radarWords"
-                :key="word"
-                class="article-card"
-              >
-                <view class="notify-tag-row">
-                  <view class="notify-tag"><text>📡 {{ word }}</text></view>
-                </view>
-                <text class="article-card-title">「{{ word }}」相关资讯已更新 {{ 3 + i }} 条</text>
-                <view class="article-card-meta">
-                  <text class="meta-time">{{ i === 0 ? '刚刚' : i + '小时前' }}</text>
-                  <text class="meta-tag read">🔔 雷达推送</text>
-                </view>
+            <template v-else-if="activeDrawer === 'history'">
+              <view v-if="historyArticles.length === 0" class="drawer-empty">
+                <text class="drawer-empty-title">暂无阅读记录</text>
+                <text class="drawer-empty-sub">点击资讯卡片开始阅读</text>
               </view>
-            </view>
-          </view>
-        </scroll-view>
-      </view>
-
-      <!-- ── 数据报告 ── -->
-      <view
-        v-show="activeDrawer === 'report'"
-        class="drawer"
-        :class="{ 'drawer-open': drawerVisible && activeDrawer === 'report' }"
-        @tap.stop
-      >
-        <view class="drawer-handle" />
-        <view class="drawer-header">
-          <text class="drawer-title">本周数据报告</text>
-          <view class="drawer-close-btn" @tap="closeDrawer">
-            <svg-close />
-          </view>
-        </view>
-        <scroll-view scroll-y class="drawer-scroll">
-          <view class="drawer-body">
-            <view class="report-grid">
-              <view class="report-stat-card" style="background:#F0FDF4;">
-                <text class="report-stat-icon">📰</text>
-                <text class="report-stat-num">{{ store.userInfo.readCount }}</text>
-                <text class="report-stat-label">阅读资讯</text>
-              </view>
-              <view class="report-stat-card" style="background:#FFF7E6;">
-                <text class="report-stat-icon">⭐</text>
-                <text class="report-stat-num">{{ store.collectedArticles.length }}</text>
-                <text class="report-stat-label">收藏资讯</text>
-              </view>
-              <view class="report-stat-card" style="background:#E6F4FF;">
-                <text class="report-stat-icon">👍</text>
-                <text class="report-stat-num">{{ store.likedArticles.length }}</text>
-                <text class="report-stat-label">点赞资讯</text>
-              </view>
-              <view class="report-stat-card" style="background:#FFF0F6;">
-                <text class="report-stat-icon">📡</text>
-                <text class="report-stat-num">{{ store.preference.radarWords.length }}</text>
-                <text class="report-stat-label">雷达词</text>
-              </view>
-            </view>
-            <view class="info-card" style="margin-top:0;">
-              <text class="info-card-label">最活跃领域</text>
-              <view class="domain-tags">
+              <view v-else class="article-card-list">
                 <view
-                  v-for="d in store.preference.domains.slice(0,2)"
-                  :key="d"
-                  class="domain-tag-item"
+                  v-for="(a, i) in historyArticles"
+                  :key="`${a.id}-${i}`"
+                  class="mini-article-card"
+                  @tap="openArticle(a.id)"
                 >
-                  <text>{{ d === 'tech' ? '科技' : d === 'finance' ? '财经' : d === 'policy' ? '政策' : '商情' }}</text>
+                  <text class="mini-article-title">{{ a.title }}</text>
+                  <view class="mini-article-meta">
+                    <text class="meta-source">{{ a.source }}</text>
+                    <text class="meta-dot">·</text>
+                    <text class="meta-time">{{ a.publishTime }}</text>
+                    <text class="meta-tag green">已读</text>
+                  </view>
                 </view>
               </view>
-            </view>
-            <view v-if="store.userInfo.memberLevel === 'free'" class="pro-hint-card">
-              <text class="pro-hint-text">📊 升级 Pro 解锁完整数据报告</text>
-            </view>
+            </template>
+
+            <template v-else-if="activeDrawer === 'liked'">
+              <view v-if="store.likedArticles.length === 0" class="drawer-empty">
+                <text class="drawer-empty-title">还没有点赞任何文章</text>
+                <text class="drawer-empty-sub">在文章详情页点击点赞即可加入这里</text>
+              </view>
+              <view v-else class="article-card-list">
+                <view
+                  v-for="a in store.likedArticles"
+                  :key="a.id"
+                  class="mini-article-card"
+                  @tap="openArticle(a.id)"
+                >
+                  <text class="mini-article-title">{{ a.title }}</text>
+                  <view class="mini-article-meta">
+                    <text class="meta-source">{{ a.source }}</text>
+                    <text class="meta-dot">·</text>
+                    <text class="meta-time">{{ a.publishTime }}</text>
+                    <text class="meta-tag pink">已赞</text>
+                  </view>
+                </view>
+              </view>
+            </template>
+
+            <template v-else-if="activeDrawer === 'radar'">
+              <view v-if="store.preference.radarWords.length === 0" class="drawer-empty">
+                <text class="drawer-empty-title">还没有设置雷达词</text>
+                <text class="drawer-empty-sub">去偏好设置添加关注的公司、产品或赛道关键词</text>
+                <view class="drawer-action-btn" @tap="goPreference()"><text>前往设置</text></view>
+              </view>
+              <view v-else class="drawer-stack">
+                <view class="info-card">
+                  <text class="info-card-label">当前雷达词</text>
+                  <view class="radar-chips">
+                    <view v-for="word in store.preference.radarWords" :key="word" class="radar-chip">
+                      <text>{{ word }}</text>
+                    </view>
+                  </view>
+                </view>
+                <view class="info-card">
+                  <text class="info-card-label">触发统计</text>
+                  <text class="info-card-text">本周共触发 <text class="highlight-text">12 次</text> 雷达词推送，为你精准捕获关键资讯。</text>
+                </view>
+                <view class="drawer-action-btn" @tap="goPreference()"><text>管理雷达词</text></view>
+              </view>
+            </template>
+
+            <template v-else-if="activeDrawer === 'notification'">
+              <view v-if="store.preference.radarWords.length === 0" class="drawer-empty">
+                <text class="drawer-empty-title">暂无通知</text>
+                <text class="drawer-empty-sub">设置雷达词后，系统会自动推送相关资讯</text>
+              </view>
+              <view v-else class="article-card-list">
+                <view
+                  v-for="(word, i) in store.preference.radarWords"
+                  :key="word"
+                  class="mini-article-card"
+                >
+                  <view class="notify-tag-row">
+                    <view class="notify-tag"><text>{{ word }}</text></view>
+                  </view>
+                  <text class="mini-article-title">“{{ word }}” 相关资讯已更新 {{ 3 + i }} 条</text>
+                  <view class="mini-article-meta">
+                    <text class="meta-time">{{ i === 0 ? '刚刚' : i + '小时前' }}</text>
+                    <text class="meta-tag blue">雷达推送</text>
+                  </view>
+                </view>
+              </view>
+            </template>
+
+            <template v-else-if="activeDrawer === 'report'">
+              <view class="report-grid">
+                <view class="report-stat-card green-soft">
+                  <text class="report-stat-num">{{ store.userInfo.readCount }}</text>
+                  <text class="report-stat-label">阅读资讯</text>
+                </view>
+                <view class="report-stat-card orange-soft">
+                  <text class="report-stat-num">{{ store.collectedArticles.length }}</text>
+                  <text class="report-stat-label">收藏资讯</text>
+                </view>
+                <view class="report-stat-card blue-soft">
+                  <text class="report-stat-num">{{ store.likedArticles.length }}</text>
+                  <text class="report-stat-label">点赞资讯</text>
+                </view>
+                <view class="report-stat-card purple-soft">
+                  <text class="report-stat-num">{{ store.preference.radarWords.length }}</text>
+                  <text class="report-stat-label">雷达词</text>
+                </view>
+              </view>
+              <view class="drawer-stack">
+                <view class="info-card">
+                  <text class="info-card-label">最活跃领域</text>
+                  <view class="domain-tags">
+                    <view
+                      v-for="d in store.preference.domains.slice(0, 2)"
+                      :key="d"
+                      class="domain-tag-item"
+                    >
+                      <text>{{ d === 'tech' ? '科技' : d === 'finance' ? '财经' : d === 'policy' ? '政策' : '商情' }}</text>
+                    </view>
+                  </view>
+                </view>
+                <view v-if="store.userInfo.memberLevel === 'free'" class="pro-hint-card">
+                  <text class="pro-hint-text">升级会员可解锁完整数据报告与更长时间跨度分析</text>
+                </view>
+              </view>
+            </template>
           </view>
         </scroll-view>
       </view>
 
-      <!-- ── 通用信息抽屉（升级/隐私/反馈/帮助） ── -->
       <view
-        v-show="['upgrade','privacy','feedback','help'].includes(activeDrawer)"
-        class="drawer"
-        :class="{ 'drawer-open': drawerVisible && ['upgrade','privacy','feedback','help'].includes(activeDrawer) }"
+        v-else-if="['upgrade','privacy','feedback','help'].includes(activeDrawer)"
+        class="drawer info-drawer"
+        :class="{ 'drawer-open': drawerVisible }"
         @tap.stop
       >
         <view class="drawer-handle" />
         <view class="drawer-header">
           <text class="drawer-title">{{ infoDrawerConfig.title }}</text>
           <view class="drawer-close-btn" @tap="closeDrawer">
-            <svg-close />
+            <text>×</text>
           </view>
         </view>
         <view class="info-drawer-content">
-          <text class="info-drawer-icon">{{ infoDrawerConfig.icon }}</text>
+          <view class="info-drawer-badge"><text>{{ infoDrawerConfig.mark }}</text></view>
           <text class="info-drawer-text">{{ infoDrawerConfig.text }}</text>
-          <view v-if="activeDrawer === 'upgrade'" class="drawer-action-btn upgrade-action-btn">
+          <view v-if="activeDrawer === 'upgrade'" class="drawer-action-btn wide-btn">
             <text>立即升级 Pro</text>
           </view>
         </view>
@@ -457,27 +348,6 @@
     </view>
   </view>
 </template>
-
-<!-- SVG 关闭按钮组件 -->
-<script lang="ts">
-import { defineComponent, h } from 'vue'
-const SvgClose = defineComponent({
-  name: 'SvgClose',
-  render() {
-    return h('view', {
-      style: 'width:28px;height:28px;display:flex;align-items:center;justify-content:center;'
-    }, [
-      h('svg', {
-        width: '12', height: '12', viewBox: '0 0 12 12', fill: 'none',
-        stroke: '#666', 'stroke-width': '1.8', 'stroke-linecap': 'round'
-      }, [
-        h('path', { d: 'M2 2l8 8M10 2l-8 8' })
-      ])
-    ])
-  }
-})
-export { SvgClose }
-</script>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
@@ -489,14 +359,13 @@ const drawerVisible = ref(false)
 let closeTimer: ReturnType<typeof setTimeout> | null = null
 
 const MEMBER_CONFIGS = {
-  free: { label: '免费版', color: '#1DB954', bg: 'rgba(255,255,255,0.9)' },
-  pro: { label: 'Pro 会员', color: '#FA8C16', bg: 'rgba(255,255,255,0.9)' },
-  enterprise: { label: '企业版', color: '#1677FF', bg: 'rgba(255,255,255,0.9)' },
+  free: { label: '免费版', color: '#15803D', bg: '#ECFDF3' },
+  pro: { label: 'Pro 会员', color: '#C2410C', bg: '#FFF7ED' },
+  enterprise: { label: '企业版', color: '#1D4ED8', bg: '#DBEAFE' },
 }
 
-const memberLabel = computed(() => MEMBER_CONFIGS[store.userInfo.memberLevel]?.label ?? '免费版')
+const memberMeta = computed(() => MEMBER_CONFIGS[store.userInfo.memberLevel] ?? MEMBER_CONFIGS.free)
 
-// 阅读历史 = 收藏 + 点赞，去重，最多 10 条
 const historyArticles = computed(() => {
   const seen = new Set<number>()
   const result: typeof store.articles = []
@@ -510,62 +379,69 @@ const historyArticles = computed(() => {
   return result
 })
 
-const INFO_DRAWERS: Record<string, { title: string; icon: string; text: string }> = {
+const DRAWER_TITLES: Record<string, string> = {
+  collect: '我的收藏',
+  history: '阅读历史',
+  liked: '我的点赞',
+  radar: '我的雷达词',
+  notification: '消息通知',
+  report: '本周数据报告',
+}
+
+const INFO_DRAWERS: Record<string, { title: string; mark: string; text: string }> = {
   upgrade: {
     title: '升级 Pro',
-    icon: '👑',
-    text: 'Pro 版本提供无限雷达词追踪、企业情报分析、每周数据报告等高级功能。升级后立即解锁全部权益。',
+    mark: 'PRO',
+    text: 'Pro 版本提供更多雷达词追踪、企业情报分析、每周数据报告等高级功能，升级后即可解锁全部权益。',
   },
   privacy: {
     title: '隐私设置',
-    icon: '🔒',
-    text: '您的数据完全本地存储，不上传任何个人信息。微澜严格遵守隐私保护原则，不会将您的阅读记录和偏好设置分享给第三方。',
+    mark: '隐',
+    text: '你的数据默认仅用于当前体验，不会公开分享。阅读记录和偏好设置将按产品规则妥善保存与保护。',
   },
   feedback: {
     title: '意见反馈',
-    icon: '💬',
-    text: '感谢您的使用！如有建议或问题，请联系我们的产品团队。您的反馈将帮助我们持续改进产品体验。',
+    mark: '反',
+    text: '感谢你的使用。若你对内容质量、推送策略或界面体验有建议，可以随时反馈，我们会持续迭代优化。',
   },
   help: {
     title: '帮助中心',
-    icon: '❓',
-    text: '遇到问题？请查阅使用文档或联系在线客服获取帮助。我们的客服团队将在工作日 9:00-18:00 为您提供支持。',
+    mark: '帮',
+    text: '如在使用过程中遇到问题，可先查看常见问题说明，或联系支持入口获取帮助。',
   },
 }
 
-const infoDrawerConfig = computed(() => INFO_DRAWERS[activeDrawer.value] ?? { title: '', icon: '', text: '' })
+const drawerTitle = computed(() => DRAWER_TITLES[activeDrawer.value] ?? '')
+const infoDrawerConfig = computed(() => INFO_DRAWERS[activeDrawer.value] ?? { title: '', mark: '', text: '' })
 
 function openDrawer(key: string) {
   if (closeTimer) clearTimeout(closeTimer)
   activeDrawer.value = key
-  // 下一帧触发动画
-  setTimeout(() => { drawerVisible.value = true }, 16)
-}
-
-function showDrawer(key: string) {
-  openDrawer(key)
+  setTimeout(() => {
+    drawerVisible.value = true
+  }, 16)
 }
 
 function closeDrawer() {
   drawerVisible.value = false
   closeTimer = setTimeout(() => {
     activeDrawer.value = ''
-  }, 360)
+  }, 280)
 }
 
 function goPreference() {
   closeDrawer()
   setTimeout(() => {
     uni.switchTab({ url: '/pages/preference/index' })
-  }, 360)
+  }, 280)
 }
 
-function openArticle(id: number, from: string) {
+function openArticle(id: number) {
   store.setCurrentArticle(id)
   closeDrawer()
   setTimeout(() => {
     uni.navigateTo({ url: '/pages/article/index' })
-  }, 300)
+  }, 260)
 }
 
 function confirmReset() {
@@ -586,581 +462,613 @@ function confirmReset() {
 .profile-page {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  background: #F5F5F5;
-  position: relative;
+  height: 100vh;
+  background: #F4F6F8;
   overflow: hidden;
 }
 
-/* ── 绿色渐变头部 ── */
-.green-header {
-  background: linear-gradient(135deg, #1DB954 0%, #059669 100%);
-  padding: 48rpx 36rpx 40rpx 36rpx;
-  position: relative;
-  border-bottom-left-radius: 36rpx;
-  border-bottom-right-radius: 36rpx;
+.profile-header {
+  margin: 34rpx 24rpx 0;
+  padding: 36rpx 24rpx 24rpx;
+  background: #FFFFFF;
+  border: 1rpx solid #E5EAF0;
+  border-radius: 24rpx;
 }
 
 .user-row {
-  display: flex;
-  align-items: center;
-  gap: 28rpx;
-  margin-bottom: 40rpx;
-  position: relative;
+  display: grid;
+  grid-template-columns: 92rpx minmax(0, 1fr);
+  grid-template-areas:
+    'avatar info'
+    'avatar action';
+  align-items: flex-start;
+  column-gap: 18rpx;
+  row-gap: 14rpx;
 }
 
 .avatar-wrap {
-  width: 128rpx;
-  height: 128rpx;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.25);
-  border: 4rpx solid rgba(255, 255, 255, 0.3);
+  grid-area: avatar;
+  width: 92rpx;
+  height: 92rpx;
+  border-radius: 28rpx;
+  background: #16A34A;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 8rpx 24rpx rgba(0,0,0,0.1);
 }
 
-.avatar-emoji { font-size: 56rpx; }
+.avatar-text {
+  font-size: 34rpx;
+  color: #FFFFFF;
+  font-weight: 700;
+  line-height: 1;
+}
 
-.user-info { flex: 1; min-width: 0; }
+.user-info {
+  grid-area: info;
+  min-width: 0;
+  padding-right: 96rpx;
+}
 
 .name-row {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10rpx;
-  margin-bottom: 8rpx;
-  flex-wrap: nowrap;
 }
 
 .user-name {
-  font-size: 36rpx;
+  font-size: 34rpx;
   font-weight: 700;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 1;
-  min-width: 0;
-  letter-spacing: 1rpx;
+  color: #0F172A;
 }
 
 .member-badge {
+  min-height: 36rpx;
+  padding: 0 14rpx;
+  border-radius: 999rpx;
   display: inline-flex;
   align-items: center;
-  padding: 4rpx 16rpx;
-  border-radius: 20rpx;
-  background: rgba(255, 255, 255, 0.9);
+  justify-content: center;
 }
 
 .member-text {
-  font-size: 22rpx;
-  font-weight: 600;
-  color: #1DB954;
-}
-
-.user-id-row {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
+  font-size: 20rpx;
+  font-weight: 700;
 }
 
 .user-id {
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.75);
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #64748B;
 }
 
-.edit-btn-absolute {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  padding: 8rpx 20rpx;
-  border-radius: 40rpx;
-  border: 2rpx solid rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.1);
+.user-note {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #94A3B8;
+  line-height: 1.6;
 }
 
-.edit-btn-text {
-  font-size: 24rpx;
-  color: #fff;
-  font-weight: 500;
+.benefit-btn {
+  grid-area: action;
+  justify-self: start;
+  position: static;
+  margin-top: 2rpx;
+  min-width: 132rpx;
+  height: 56rpx;
+  padding: 0 18rpx;
+  border-radius: 999rpx;
+  background: #F8FAFC;
+  border: 1rpx solid #E5EAF0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.benefit-btn-text {
+  font-size: 22rpx;
+  color: #475569;
+  font-weight: 600;
 }
 
 .stats-row {
-  display: flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 24rpx;
-  padding: 32rpx 0;
-  backdrop-filter: blur(10px);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12rpx;
+  margin-top: 20rpx;
 }
 
 .stat-item {
-  flex: 1;
+  min-height: 94rpx;
+  padding: 16rpx;
+  border-radius: 18rpx;
+  background: #F8FAFC;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6rpx;
+  justify-content: center;
+  gap: 8rpx;
 }
 
 .stat-num {
-  font-size: 44rpx;
+  font-size: 32rpx;
   font-weight: 700;
-  color: #fff;
+  color: #0F172A;
 }
 
 .stat-label {
-  font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 21rpx;
+  color: #94A3B8;
 }
 
-.stat-divider {
-  width: 1rpx;
-  height: 60rpx;
-  background: rgba(255, 255, 255, 0.3);
-}
-
-/* ── 升级 Pro 卡片 ── */
 .upgrade-card {
-  margin: 20rpx 24rpx 0;
-  background: #FFFBE6;
-  border-radius: 20rpx;
-  padding: 24rpx 28rpx;
+  margin: 16rpx 24rpx 0;
+  padding: 22rpx 24rpx;
+  background: #FFF7ED;
+  border: 1rpx solid #FED7AA;
+  border-radius: 22rpx;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border: 1rpx solid #FFE58F;
-}
-
-.upgrade-left {
-  display: flex;
-  align-items: center;
   gap: 16rpx;
-  flex: 1;
 }
 
-.upgrade-crown {
-  font-size: 44rpx;
-  flex-shrink: 0;
+.upgrade-copy {
+  flex: 1;
+  min-width: 0;
 }
 
 .upgrade-title {
   display: block;
-  font-size: 28rpx;
+  font-size: 27rpx;
   font-weight: 700;
-  color: #7C4A00;
-  margin-bottom: 6rpx;
+  color: #9A3412;
 }
 
 .upgrade-desc {
+  display: block;
+  margin-top: 8rpx;
   font-size: 22rpx;
-  color: #B07800;
+  color: #C2410C;
+  line-height: 1.6;
 }
 
-.upgrade-btn {
-  background: #FA8C16;
-  border-radius: 40rpx;
-  padding: 14rpx 36rpx;
+.upgrade-cta {
+  min-width: 108rpx;
+  height: 58rpx;
+  border-radius: 999rpx;
+  background: #EA580C;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
-.upgrade-btn-text {
-  font-size: 28rpx;
+.upgrade-cta text {
+  font-size: 23rpx;
   font-weight: 700;
-  color: #fff;
+  color: #FFFFFF;
 }
 
-/* ── 菜单 ── */
-.menu-scroll {
+  .menu-scroll {
   flex: 1;
   overflow: hidden;
-  margin-top: 20rpx;
+  transition: opacity 0.2s ease;
 }
 
+.menu-scroll-muted {
+  opacity: 0;
+  pointer-events: none;
+}
+
+
 .menu-group {
-  margin-bottom: 32rpx;
-  padding: 0 32rpx;
+  margin: 18rpx 24rpx 0;
 }
 
 .menu-group-title {
-  font-size: 24rpx;
-  color: #AAAAAA;
   display: block;
   margin-bottom: 12rpx;
-  padding-left: 4rpx;
+  font-size: 23rpx;
+  color: #64748B;
 }
 
 .menu-card {
-  background: #fff;
-  border-radius: 24rpx;
+  background: #FFFFFF;
+  border: 1rpx solid #E5EAF0;
+  border-radius: 22rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
 }
 
 .menu-item {
   display: flex;
   align-items: center;
-  gap: 24rpx;
-  padding: 32rpx 32rpx;
+  gap: 16rpx;
+  padding: 24rpx;
 }
 
-.menu-icon {
-  font-size: 36rpx;
-  width: 44rpx;
-  text-align: center;
+.menu-icon-wrap {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
+.menu-icon-text {
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.blue { background: #EAF3FF; color: #1D4ED8; }
+.green { background: #ECFDF3; color: #15803D; }
+.orange { background: #FFF7ED; color: #C2410C; }
+.purple { background: #F5F3FF; color: #7C3AED; }
+.emerald { background: #ECFDF3; color: #16A34A; }
+.gray { background: #F1F5F9; color: #475569; }
+.red { background: #FEF2F2; color: #DC2626; }
+
 .menu-label-wrap {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4rpx;
+  min-width: 0;
 }
 
 .menu-label {
-  font-size: 28rpx;
-  color: #1A1A1A;
+  display: block;
+  font-size: 27rpx;
+  font-weight: 700;
+  color: #0F172A;
 }
 
 .menu-sub {
+  display: block;
+  margin-top: 6rpx;
   font-size: 22rpx;
-  color: #AAAAAA;
+  color: #94A3B8;
+}
+
+.danger-label {
+  color: #DC2626;
 }
 
 .menu-arrow {
-  font-size: 36rpx;
-  color: #D0D0D0;
+  font-size: 30rpx;
+  color: #CBD5E1;
   flex-shrink: 0;
 }
 
 .menu-divider {
   height: 1rpx;
-  background: #F5F5F5;
-  margin: 0 28rpx;
+  background: #EEF2F7;
+  margin-left: 96rpx;
 }
 
-.danger-label { color: #FF4D4F; }
+.bottom-pad {
+  height: 32rpx;
+}
 
-.bottom-pad { height: 60rpx; }
-
-/* ═══════════════════════════════════════════════════════
-   抽屉系统（统一动效）
-═══════════════════════════════════════════════════════ */
-.overlay {
+  .overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 9999;
+  inset: 0;
+  background: rgba(15, 23, 42, 0);
   display: flex;
   align-items: flex-end;
-  background: rgba(0, 0, 0, 0);
-  transition: background 0.35s ease;
-  pointer-events: none;
+  transition: background 0.28s ease;
+  z-index: 1200;
 }
+
 
 .overlay-visible {
-  background: rgba(0, 0, 0, 0.45);
-  pointer-events: auto;
+  background: rgba(15, 23, 42, 0.34);
 }
 
-/* 抽屉面板 */
-.drawer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #F8FAFC;
-  border-radius: 48rpx 48rpx 0 0;
-  max-height: 88vh;
+  .drawer {
+  width: 100%;
+  max-height: 86vh;
+  background: #FFFFFF;
+  border-radius: 30rpx 30rpx 0 0;
+  transform: translateY(100%);
+  transition: transform 0.28s ease;
+  box-shadow: 0 -18rpx 48rpx rgba(15, 23, 42, 0.14);
+  position: relative;
+  z-index: 1;
+}
+
+.list-drawer {
+  min-height: 56vh;
   display: flex;
   flex-direction: column;
-  transform: translateY(100%);
-  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
-  box-shadow: 0 -12rpx 64rpx rgba(0, 0, 0, 0.15);
 }
+
+.info-drawer {
+  min-height: 34vh;
+}
+
 
 .drawer-open {
   transform: translateY(0);
 }
 
-/* 抽屉拖动条 */
 .drawer-handle {
   width: 72rpx;
   height: 8rpx;
-  background: #E0E0E0;
-  border-radius: 4rpx;
-  margin: 20rpx auto 0;
-  flex-shrink: 0;
+  border-radius: 999rpx;
+  background: #D5DCE3;
+  margin: 18rpx auto 0;
 }
 
-/* 抽屉头部 */
 .drawer-header {
-  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 32rpx 40rpx 24rpx;
-  background: #fff;
-  border-radius: 48rpx 48rpx 0 0;
-  border-bottom: 1rpx solid #F1F5F9;
+  padding: 18rpx 24rpx 14rpx;
 }
 
 .drawer-title {
-  font-size: 32rpx;
+  font-size: 30rpx;
   font-weight: 700;
-  color: #1A1A1A;
+  color: #0F172A;
 }
 
 .drawer-close-btn {
   width: 56rpx;
   height: 56rpx;
   border-radius: 50%;
-  background: #F0F0F0;
+  background: #F1F5F9;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* 抽屉滚动区 */
-.drawer-scroll {
+.drawer-close-btn text {
+  font-size: 34rpx;
+  color: #64748B;
+  line-height: 1;
+}
+
+  .drawer-scroll {
   flex: 1;
-  overflow: hidden;
+  min-height: 0;
+  max-height: calc(86vh - 100rpx);
 }
 
-.drawer-body {
-  padding: 24rpx 24rpx 32rpx;
+
+.drawer-body,
+.info-drawer-content {
+  padding: 0 24rpx 28rpx;
 }
 
-/* ── 空状态 ── */
 .drawer-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 80rpx 0 60rpx;
-  gap: 12rpx;
+  padding: 96rpx 20rpx;
+  text-align: center;
 }
-
-.drawer-empty-icon { font-size: 80rpx; }
 
 .drawer-empty-title {
+  display: block;
   font-size: 28rpx;
-  font-weight: 600;
-  color: #555;
+  font-weight: 700;
+  color: #334155;
 }
 
 .drawer-empty-sub {
-  font-size: 24rpx;
-  color: #AAAAAA;
-}
-
-/* ── 文章卡片列表 ── */
-.article-card-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20rpx;
-}
-
-.article-card {
-  background: #fff;
-  border-radius: 24rpx;
-  padding: 28rpx 28rpx 24rpx;
-  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.05);
-}
-
-.article-card-title {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #1A1A1A;
-  line-height: 1.5;
   display: block;
-  margin-bottom: 16rpx;
-}
-
-.article-card-meta {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-}
-
-.meta-source {
+  margin-top: 10rpx;
   font-size: 22rpx;
-  color: #AAAAAA;
-}
-
-.meta-dot {
-  font-size: 22rpx;
-  color: #CCCCCC;
-}
-
-.meta-time {
-  font-size: 22rpx;
-  color: #AAAAAA;
-}
-
-.meta-tag {
-  margin-left: auto;
-  font-size: 22rpx;
-  font-weight: 500;
-}
-
-.meta-tag.collected { color: #FA8C16; }
-.meta-tag.read { color: #1677FF; }
-.meta-tag.liked { color: #1DB954; }
-
-/* ── 通用操作按钮 ── */
-.drawer-action-btn {
-  margin: 24rpx 0 0;
-  background: linear-gradient(135deg, #1DB954, #16a34a);
-  border-radius: 40rpx;
-  padding: 24rpx;
-  text-align: center;
-  font-size: 28rpx;
-  color: #fff;
-  font-weight: 600;
-}
-
-.upgrade-action-btn {
-  background: linear-gradient(135deg, #FA8C16, #d97706);
-}
-
-/* ── 信息卡片 ── */
-.info-card {
-  background: #fff;
-  border-radius: 24rpx;
-  padding: 28rpx;
-  margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.05);
-}
-
-.info-card-label {
-  font-size: 24rpx;
-  font-weight: 600;
-  color: #888;
-  display: block;
-  margin-bottom: 16rpx;
-}
-
-.info-card-text {
-  font-size: 26rpx;
-  color: #555;
+  color: #94A3B8;
   line-height: 1.7;
 }
 
-.highlight-text {
-  font-weight: 700;
-  color: #1DB954;
-}
-
-/* ── 雷达词胶囊 ── */
-.radar-content { padding-top: 4rpx; }
-
-.radar-chips {
+.article-card-list,
+.drawer-stack {
   display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+
+.mini-article-card,
+.info-card,
+.pro-hint-card {
+  padding: 22rpx;
+  border-radius: 20rpx;
+  background: #F8FAFC;
+  border: 1rpx solid #E5EAF0;
+}
+
+.mini-article-title {
+  display: block;
+  font-size: 27rpx;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.55;
+}
+
+.mini-article-meta {
+  display: flex;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 12rpx;
+  gap: 8rpx;
+  margin-top: 12rpx;
 }
 
-.radar-chip {
-  background: #F0FDF4;
-  border: 1rpx solid #BBF7D0;
-  border-radius: 40rpx;
-  padding: 8rpx 20rpx;
-  font-size: 24rpx;
-  color: #16a34a;
+.meta-source,
+.meta-time,
+.meta-dot {
+  font-size: 21rpx;
+  color: #94A3B8;
 }
 
-/* ── 消息通知 ── */
+.meta-tag {
+  height: 38rpx;
+  padding: 0 12rpx;
+  border-radius: 999rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19rpx;
+  font-weight: 700;
+}
+
+.meta-tag.orange { background: #FFF7ED; color: #C2410C; }
+.meta-tag.green { background: #ECFDF3; color: #15803D; }
+.meta-tag.pink { background: #FDF2F8; color: #BE185D; }
+.meta-tag.blue { background: #EAF3FF; color: #1D4ED8; }
+
 .notify-tag-row {
   margin-bottom: 12rpx;
 }
 
 .notify-tag {
+  height: 40rpx;
+  padding: 0 14rpx;
+  border-radius: 999rpx;
+  background: #ECFDF3;
+  color: #15803D;
   display: inline-flex;
-  padding: 4rpx 16rpx;
-  border-radius: 20rpx;
-  background: #F0FDF4;
-  color: #1DB954;
-  font-size: 22rpx;
-}
-
-/* ── 数据报告 ── */
-.report-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16rpx;
-  margin-bottom: 20rpx;
-}
-
-.report-stat-card {
-  border-radius: 20rpx;
-  padding: 24rpx;
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8rpx;
+  justify-content: center;
 }
 
-.report-stat-icon { font-size: 40rpx; }
-
-.report-stat-num {
-  font-size: 44rpx;
+.notify-tag text {
+  font-size: 20rpx;
   font-weight: 700;
-  color: #1A1A1A;
 }
 
-.report-stat-label {
-  font-size: 22rpx;
-  color: #888;
+.info-card-label {
+  display: block;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #0F172A;
 }
 
+.info-card-text {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 23rpx;
+  color: #64748B;
+  line-height: 1.7;
+}
+
+.highlight-text {
+  color: #16A34A;
+  font-weight: 700;
+}
+
+.radar-chips,
 .domain-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 12rpx;
+  margin-top: 14rpx;
 }
 
+.radar-chip,
 .domain-tag-item {
-  padding: 8rpx 20rpx;
-  border-radius: 40rpx;
-  background: #F0FDF4;
-  border: 1rpx solid #BBF7D0;
-  font-size: 24rpx;
-  color: #1DB954;
+  min-height: 52rpx;
+  padding: 0 18rpx;
+  border-radius: 999rpx;
+  background: #FFFFFF;
+  border: 1rpx solid #E5EAF0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.pro-hint-card {
-  background: linear-gradient(135deg, #FFF7E6, #FFFBE6);
-  border-radius: 20rpx;
-  padding: 24rpx;
-  border: 1rpx solid #FFE58F;
-  text-align: center;
+.radar-chip text,
+.domain-tag-item text {
+  font-size: 22rpx;
+  color: #475569;
+  font-weight: 600;
 }
+
+.drawer-action-btn {
+  margin-top: 4rpx;
+  height: 72rpx;
+  border-radius: 999rpx;
+  background: #16A34A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drawer-action-btn text {
+  font-size: 25rpx;
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14rpx;
+  margin-bottom: 14rpx;
+}
+
+.report-stat-card {
+  padding: 24rpx 20rpx;
+  border-radius: 20rpx;
+}
+
+.report-stat-num {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.report-stat-label {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #64748B;
+}
+
+.green-soft { background: #F0FDF4; }
+.orange-soft { background: #FFF7ED; }
+.blue-soft { background: #EAF3FF; }
+.purple-soft { background: #F5F3FF; }
 
 .pro-hint-text {
-  font-size: 26rpx;
-  color: #B07800;
-  font-weight: 500;
+  font-size: 22rpx;
+  color: #94A3B8;
+  line-height: 1.7;
 }
 
-/* ── 通用信息抽屉 ── */
 .info-drawer-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 48rpx 48rpx 64rpx;
-  gap: 24rpx;
+  padding-top: 10rpx;
+  padding-bottom: 36rpx;
 }
 
-.info-drawer-icon { font-size: 80rpx; }
+.info-drawer-badge {
+  width: 92rpx;
+  height: 92rpx;
+  border-radius: 28rpx;
+  background: #F1F5F9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4rpx auto 20rpx;
+}
+
+.info-drawer-badge text {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #475569;
+}
 
 .info-drawer-text {
-  font-size: 28rpx;
-  color: #555;
+  display: block;
+  font-size: 24rpx;
+  color: #64748B;
   line-height: 1.8;
   text-align: center;
+}
+
+.wide-btn {
+  margin-top: 24rpx;
 }
 </style>

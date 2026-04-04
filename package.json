@@ -2,6 +2,8 @@
   "name": "pulseread-uniapp",
   "version": "1.0.0",
   "scripts": {
+    "dev": "uni",
+    "build": "pnpm run build:h5",
     "dev:custom": "uni -p",
     "dev:h5": "uni",
     "dev:h5:ssr": "uni --ssr",
@@ -35,6 +37,7 @@
     "build:quickapp-webview-huawei": "uni build -p quickapp-webview-huawei",
     "build:quickapp-webview-union": "uni build -p quickapp-webview-union",
     "type-check": "vue-tsc --noEmit",
+    "preview": "vite preview --host",
     "vercel-build": "bash vercel-build.sh"
   },
   "dependencies": {

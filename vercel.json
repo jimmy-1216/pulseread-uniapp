@@ -1,6 +1,6 @@
 {
-  "installCommand": "echo 'Skipping default install'",
-  "buildCommand": "pnpm install --no-frozen-lockfile && bash vercel-build.sh",
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "buildCommand": "pnpm run vercel-build",
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }

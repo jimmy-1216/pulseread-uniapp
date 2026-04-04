@@ -1,68 +1,53 @@
 <template>
   <view class="article-card" @tap="$emit('click', article)">
-    <view class="card-inner">
-      <!-- 顶部：标签行 + AI 评分 -->
-      <view class="tags-row">
-        <view class="tag" :style="{ color: domainInfo.color, background: domainInfo.bg }">
+    <view class="card-head">
+      <view class="tag-row">
+        <view class="tag domain-tag" :style="{ color: domainInfo.color, background: domainInfo.bg }">
           <text>{{ domainInfo.label }}</text>
         </view>
-        <view class="tag" :style="{ color: sentimentInfo.color, background: sentimentInfo.bg }">
+        <view class="tag sentiment-tag" :style="{ color: sentimentInfo.color, background: sentimentInfo.bg }">
           <text>{{ sentimentInfo.label }}</text>
         </view>
         <view v-if="article.radarWords[0]" class="tag radar-tag">
-          <text>📡 {{ article.radarWords[0] }}</text>
-        </view>
-        <!-- AI 评分徽章 -->
-        <view class="score-badge" :style="{ background: scoreColor, boxShadow: `0 4rpx 16rpx ${scoreColor}55` }">
-          <text class="score-num">{{ article.aiScore }}</text>
-          <text class="score-unit">分</text>
+          <text>{{ article.radarWords[0] }}</text>
         </view>
       </view>
 
-      <!-- 标题 -->
-      <text class="article-title">{{ article.title }}</text>
+      <view class="score-badge">
+        <text class="score-value">{{ article.aiScore }}</text>
+        <text class="score-unit">分</text>
+      </view>
+    </view>
 
-      <!-- AI 摘要 -->
-      <text class="article-summary">{{ article.aiSummary }}</text>
+    <text class="article-title">{{ article.title }}</text>
+    <text class="article-summary">{{ article.aiSummary }}</text>
 
-      <!-- AI 要点 -->
-      <view v-if="article.aiKeyPoints.length > 0" class="key-points">
-        <view
-          v-for="(pt, i) in article.aiKeyPoints.slice(0, 2)"
-          :key="i"
-          class="key-point-item"
-        >
-          <text class="key-point-dot">▸</text>
-          <text class="key-point-text">{{ pt }}</text>
-        </view>
+    <view v-if="displayPoints.length" class="points-panel">
+      <view v-for="(point, index) in displayPoints" :key="`${article.id}-${index}`" class="point-item">
+        <text class="point-arrow">▸</text>
+        <text class="point-text">{{ point }}</text>
+      </view>
+    </view>
+
+    <view class="card-footer">
+      <view class="meta-line">
+        <text class="meta-text">{{ article.source }}</text>
+        <text class="meta-separator">·</text>
+        <text class="meta-text">{{ article.publishTime }}</text>
+        <template v-if="article.isAiTranslated">
+          <text class="meta-separator">·</text>
+          <text class="translate-text">AI译</text>
+        </template>
       </view>
 
-      <!-- 底部：来源 + 时间 + 操作 -->
-      <view class="card-footer">
-        <view class="source-info">
-          <text class="source-text">{{ article.source }}</text>
-          <text class="separator">·</text>
-          <text class="time-text">{{ article.publishTime }}</text>
-          <text v-if="article.isAiTranslated" class="separator">·</text>
-          <text v-if="article.isAiTranslated" class="translated-tag">🌐 AI译</text>
+      <view class="action-row">
+        <view class="action-item" :class="{ active: article.isLiked }" @tap.stop="$emit('like', article.id)">
+          <text class="action-icon">🔥</text>
+          <text class="action-count">{{ article.likeCount }}</text>
         </view>
-        <view class="action-row">
-          <view
-            class="action-btn"
-            :style="{ color: article.isLiked ? '#1DB954' : '#C0C0C0' }"
-            @tap.stop="$emit('like', article.id)"
-          >
-            <text class="action-icon">{{ article.isLiked ? '👍' : '👍' }}</text>
-            <text class="action-count">{{ article.likeCount }}</text>
-          </view>
-          <view
-            class="action-btn"
-            :style="{ color: article.isCollected ? '#FA8C16' : '#C0C0C0' }"
-            @tap.stop="$emit('collect', article.id)"
-          >
-            <text class="action-icon">⭐</text>
-            <text class="action-count">{{ article.collectCount }}</text>
-          </view>
+        <view class="action-item" :class="{ collected: article.isCollected }" @tap.stop="$emit('collect', article.id)">
+          <text class="action-icon">⭐</text>
+          <text class="action-count">{{ article.collectCount }}</text>
         </view>
       </view>
     </view>
@@ -81,190 +66,213 @@ defineEmits<{
 }>()
 
 const DOMAIN_MAP: Record<string, { label: string; color: string; bg: string }> = {
-  tech: { label: '科技', color: '#1677FF', bg: '#E6F4FF' },
-  finance: { label: '财经', color: '#FA8C16', bg: '#FFF7E6' },
-  policy: { label: '政策', color: '#52C41A', bg: '#F6FFED' },
-  commerce: { label: '商情', color: '#EB2F96', bg: '#FFF0F6' },
+  tech: { label: '科技', color: '#2B6DE5', bg: '#EDF4FF' },
+  finance: { label: '财经', color: '#C97A0A', bg: '#FFF5E7' },
+  policy: { label: '政策', color: '#198754', bg: '#EAF8F0' },
+  commerce: { label: '商情', color: '#B5478A', bg: '#FFF1F8' },
 }
 
 const SENTIMENT_MAP: Record<string, { label: string; color: string; bg: string }> = {
-  positive: { label: '利好', color: '#52C41A', bg: '#F6FFED' },
-  negative: { label: '利空', color: '#FF4D4F', bg: '#FFF1F0' },
-  neutral: { label: '中性', color: '#8C8C8C', bg: '#F5F5F5' },
+  positive: { label: '利好', color: '#4FAF5C', bg: '#F1FAEE' },
+  negative: { label: '利空', color: '#D65B5B', bg: '#FFF1F1' },
+  neutral: { label: '中性', color: '#8A95A5', bg: '#F3F5F8' },
 }
 
-const domainInfo = computed(() => DOMAIN_MAP[props.article.domain] ?? { label: '其他', color: '#666', bg: '#F5F5F5' })
+const domainInfo = computed(() => DOMAIN_MAP[props.article.domain] ?? { label: '其他', color: '#666666', bg: '#F5F5F5' })
 const sentimentInfo = computed(() => SENTIMENT_MAP[props.article.sentiment] ?? SENTIMENT_MAP.neutral)
-
-const scoreColor = computed(() => {
-  const s = props.article.aiScore
-  if (s >= 88) return '#FF4D4F'
-  if (s >= 75) return '#FA8C16'
-  return '#1DB954'
-})
+const displayPoints = computed(() => (props.article.aiKeyPoints ?? []).filter(Boolean).slice(0, 2))
 </script>
 
 <style scoped>
 .article-card {
-  background: #fff;
-  margin: 0 24rpx 16rpx;
-  border-radius: 20rpx;
-  overflow: hidden;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
-  border: 1rpx solid rgba(0, 0, 0, 0.05);
+  margin: 0 24rpx 18rpx;
+  padding: 22rpx 22rpx 18rpx;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FEFEFE 100%);
+  border-radius: 24rpx;
+  border: 1rpx solid #EEF1F5;
+  box-shadow: 0 6rpx 20rpx rgba(31, 41, 55, 0.05);
 }
 
-.card-inner {
-  padding: 28rpx 28rpx 24rpx;
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 14rpx;
 }
 
-.tags-row {
+.tag-row {
   display: flex;
   align-items: center;
   gap: 10rpx;
-  margin-bottom: 16rpx;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .tag {
-  font-size: 22rpx;
-  padding: 5rpx 16rpx;
-  border-radius: 8rpx;
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38rpx;
+  padding: 0 14rpx;
+  border-radius: 10rpx;
+  font-size: 21rpx;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
 .radar-tag {
-  color: #7C3AED;
-  background: #F5F0FF;
+  color: #7A5CE6;
+  background: #F4EEFF;
 }
 
 .score-badge {
-  margin-left: auto;
-  width: 56rpx;
-  height: 56rpx;
+  width: 68rpx;
+  height: 68rpx;
   border-radius: 50%;
+  background: linear-gradient(180deg, #FF7171 0%, #FF4D4F 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 6rpx 16rpx rgba(255, 77, 79, 0.24);
 }
 
-.score-num {
-  color: #fff;
-  font-weight: 700;
-  font-size: 22rpx;
+.score-value {
+  font-size: 26rpx;
   line-height: 1;
+  color: #FFFFFF;
+  font-weight: 700;
 }
 
 .score-unit {
-  color: #fff;
-  font-size: 16rpx;
-  opacity: 0.85;
+  margin-top: 2rpx;
+  font-size: 17rpx;
   line-height: 1;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .article-title {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #111;
-  line-height: 1.5;
-  display: block;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
+  font-size: 39rpx;
+  line-height: 1.42;
+  font-weight: 700;
+  color: #20242C;
   margin-bottom: 12rpx;
 }
 
 .article-summary {
-  font-size: 26rpx;
-  color: #777;
-  line-height: 1.65;
-  display: block;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   overflow: hidden;
+  font-size: 29rpx;
+  line-height: 1.62;
+  color: #707785;
   margin-bottom: 16rpx;
 }
 
-.key-points {
-  background: #F0FDF4;
-  border-radius: 14rpx;
-  padding: 16rpx 20rpx;
+.points-panel {
   margin-bottom: 16rpx;
+  padding: 16rpx 18rpx;
+  border-radius: 16rpx;
+  background: linear-gradient(180deg, #F2FCF5 0%, #ECFAF1 100%);
 }
 
-.key-point-item {
+.point-item {
   display: flex;
   align-items: flex-start;
   gap: 10rpx;
-  margin-bottom: 6rpx;
 }
 
-.key-point-item:last-child {
-  margin-bottom: 0;
+.point-item + .point-item {
+  margin-top: 10rpx;
 }
 
-.key-point-dot {
-  color: #1DB954;
-  font-size: 24rpx;
-  flex-shrink: 0;
+.point-arrow {
   margin-top: 2rpx;
+  font-size: 18rpx;
+  line-height: 1.6;
+  color: #47B96B;
+  flex-shrink: 0;
 }
 
-.key-point-text {
-  font-size: 24rpx;
-  color: #444;
-  line-height: 1.55;
-  display: block;
-  overflow: hidden;
+.point-text {
+  flex: 1;
+  font-size: 28rpx;
+  line-height: 1.62;
+  color: #4C5B51;
 }
 
 .card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12rpx;
 }
 
-.source-info {
+.meta-line {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8rpx;
-  flex: 1;
   overflow: hidden;
+  white-space: nowrap;
 }
 
-.source-text,
-.time-text {
-  font-size: 22rpx;
-  color: #BBBBBB;
+.meta-text,
+.meta-separator,
+.translate-text {
+  font-size: 24rpx;
 }
 
-.separator {
-  font-size: 22rpx;
-  color: #CCCCCC;
+.meta-text {
+  color: #A0A6B2;
 }
 
-.translated-tag {
-  font-size: 22rpx;
-  color: #1677FF;
+.meta-separator {
+  color: #D6DAE1;
+}
+
+.translate-text {
+  color: #4A8DF2;
 }
 
 .action-row {
   display: flex;
   align-items: center;
-  gap: 32rpx;
+  gap: 18rpx;
   flex-shrink: 0;
 }
 
-.action-btn {
+.action-item {
   display: flex;
   align-items: center;
-  gap: 8rpx;
+  gap: 6rpx;
+  color: #C0A07A;
+}
+
+.action-item.active {
+  color: #F2994A;
+}
+
+.action-item.collected {
+  color: #E0B640;
 }
 
 .action-icon {
   font-size: 24rpx;
+  line-height: 1;
 }
 
 .action-count {
-  font-size: 24rpx;
-  font-weight: 500;
+  font-size: 25rpx;
+  line-height: 1;
+  font-weight: 600;
 }
 </style>

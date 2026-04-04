@@ -1,65 +1,65 @@
 <template>
   <view class="article-page">
-    <!-- 顶部导航 -->
-    <view class="nav-bar">
-      <view class="nav-back" @tap="goBack">
-        <text class="back-icon">‹</text>
+    <view class="article-nav">
+      <view class="nav-left" @tap="goBack">
+        <text class="nav-left-icon">‹</text>
       </view>
       <text class="nav-title">资讯详情</text>
-      <view class="nav-actions">
+      <view class="nav-right">
         <view
-          class="nav-action-btn"
-          :style="{ color: article?.isCollected ? '#FA8C16' : '#666' }"
+          class="nav-icon-btn"
+          :class="{ active: article?.isCollected }"
           @tap="article && store.toggleCollect(article.id)"
         >
-          <text class="nav-action-icon">{{ article?.isCollected ? '★' : '☆' }}</text>
+          <text class="nav-icon-text">{{ article?.isCollected ? '藏' : '收' }}</text>
         </view>
-        <view class="nav-action-btn" @tap="onShare">
-          <text class="nav-action-icon">↗</text>
+        <view class="nav-icon-btn" @tap="onShare">
+          <text class="nav-icon-text">分享</text>
         </view>
       </view>
     </view>
 
-    <view v-if="article">
-      <!-- 内容滚动区 -->
-      <scroll-view scroll-y class="content-scroll">
-        <view class="content-inner">
-          <!-- 标签行 -->
-          <view class="tags-row">
-            <view class="tag" :style="{ color: domainInfo.color, background: domainInfo.bg }">
-              <text>{{ domainInfo.label }}</text>
+    <view v-if="article" class="article-main">
+      <scroll-view scroll-y class="article-scroll">
+        <view class="article-inner">
+          <view class="headline-card">
+            <view class="headline-tags">
+              <view class="tag-chip domain-chip" :style="{ color: domainInfo.color, background: domainInfo.bg }">
+                <text>{{ domainInfo.label }}</text>
+              </view>
+              <view class="tag-chip" :style="{ color: sentimentInfo.color, background: sentimentInfo.bg }">
+                <text>{{ sentimentInfo.label }}</text>
+              </view>
+              <view v-if="article.isAiTranslated" class="tag-chip plain-chip ai-chip">
+                <text>AI 译文</text>
+              </view>
+              <view v-if="article.radarWords[0]" class="tag-chip plain-chip radar-chip">
+                <text>{{ article.radarWords[0] }}</text>
+              </view>
             </view>
-            <view class="tag" :style="{ color: sentimentInfo.color, background: sentimentInfo.bg }">
-              <text>{{ sentimentInfo.label }}</text>
+
+            <text class="article-title">{{ article.title }}</text>
+
+            <view class="meta-row">
+              <text class="meta-text">{{ article.source }}</text>
+              <text class="meta-dot">·</text>
+              <text class="meta-text">{{ article.publishTime }}</text>
+              <view class="score-chip" :style="{ color: scoreColor, background: `${scoreColor}14` }">
+                <text>AI {{ article.aiScore }}</text>
+              </view>
             </view>
-            <view v-if="article.isAiTranslated" class="tag ai-translated-tag">
-              <text>🌐 AI译</text>
-            </view>
-            <view v-for="rw in article.radarWords" :key="rw" class="tag radar-tag">
-              <text>📡 {{ rw }}</text>
-            </view>
-            <view class="score-badge" :style="{ background: scoreColor }">
-              <text class="score-num">{{ article.aiScore }}</text>
-              <text class="score-unit">分</text>
+
+            <view class="summary-box">
+              <text class="summary-label">导读</text>
+              <text class="summary-text">{{ article.aiSummary }}</text>
             </view>
           </view>
 
-          <!-- 标题 -->
-          <text class="article-title">{{ article.title }}</text>
-
-          <!-- 元信息 -->
-          <view class="meta-row">
-            <text class="meta-text">{{ article.source }}</text>
-            <text class="meta-sep">·</text>
-            <text class="meta-text">{{ article.publishTime }}</text>
-          </view>
-
-          <!-- 内容 Tab -->
-          <view class="content-tabs">
+          <view class="tab-bar">
             <view
               v-for="(tab, i) in TABS"
-              :key="i"
-              class="content-tab"
+              :key="tab"
+              class="tab-item"
               :class="{ active: activeTab === i }"
               @tap="activeTab = i"
             >
@@ -67,198 +67,185 @@
             </view>
           </view>
 
-          <!-- Tab 内容 -->
-          <!-- AI 解读 -->
-          <view v-if="activeTab === 0" class="tab-content">
-            <!-- AI 摘要 -->
-            <view class="ai-card ai-summary-card">
-              <view class="ai-card-header">
-                <text class="ai-card-icon">🤖</text>
-                <text class="ai-card-title ai-title-green">AI 总结</text>
+          <view v-if="activeTab === 0" class="tab-panel">
+            <view class="section-card section-hero">
+              <view class="section-head">
+                <text class="section-title">AI 解读</text>
+                <text class="section-sub">先用更短时间看清这条资讯的重要性</text>
               </view>
-              <text class="ai-summary-text">{{ article.aiSummary }}</text>
+              <text class="section-body">{{ article.aiSummary }}</text>
             </view>
 
-            <!-- AI 要点 -->
-            <view class="ai-card">
-              <view class="ai-card-header">
-                <text class="ai-card-icon">📌</text>
-                <text class="ai-card-title">核心要点</text>
+            <view class="section-card">
+              <view class="section-head compact">
+                <text class="section-title">核心要点</text>
               </view>
               <view
                 v-for="(pt, i) in article.aiKeyPoints"
                 :key="i"
-                class="key-point-item"
+                class="point-row"
               >
-                <view class="key-point-num">
+                <view class="point-index">
                   <text>{{ i + 1 }}</text>
                 </view>
-                <text class="key-point-text">{{ pt }}</text>
+                <text class="point-text">{{ pt }}</text>
               </view>
             </view>
 
-            <!-- 标签 -->
-            <view v-if="article.tags.length > 0" class="ai-card">
-              <view class="ai-card-header">
-                <text class="ai-card-icon">🏷️</text>
-                <text class="ai-card-title">相关标签</text>
+            <view v-if="article.tags.length > 0" class="section-card">
+              <view class="section-head compact">
+                <text class="section-title">相关标签</text>
               </view>
-              <view class="tags-wrap">
-                <view v-for="tag in article.tags" :key="tag" class="tag-chip">
+              <view class="tag-list-wrap">
+                <view v-for="tag in article.tags" :key="tag" class="minor-tag">
                   <text>{{ tag }}</text>
                 </view>
               </view>
             </view>
 
-            <!-- AI 问题 -->
-            <view class="ai-card">
-              <view class="ai-card-header">
-                <text class="ai-card-icon">💬</text>
-                <text class="ai-card-title">你可能想问</text>
+            <view class="section-card">
+              <view class="section-head">
+                <text class="section-title">你可能想继续问</text>
+                <text class="section-sub">点一下即可直接向 AI 追问</text>
               </view>
               <view
                 v-for="q in article.aiQuestions"
                 :key="q"
-                class="ai-question-btn"
+                class="ask-row"
                 @tap="openAiDrawer(q)"
               >
-                <text class="ai-q-text">{{ q }}</text>
-                <text class="ai-q-arrow">›</text>
+                <text class="ask-row-text">{{ q }}</text>
+                <text class="ask-row-arrow">›</text>
               </view>
             </view>
           </view>
 
-          <!-- 原文 -->
-          <view v-if="activeTab === 1" class="tab-content">
-            <text class="article-content">{{ article.content }}</text>
-          </view>
-
-          <!-- 双语对照 -->
-          <view v-if="activeTab === 2" class="tab-content">
-            <view v-if="article.contentEn">
-              <view class="bilingual-block cn-block">
-                <text class="bilingual-lang">🇨🇳 中文</text>
-                <text class="bilingual-text">{{ article.content }}</text>
+          <view v-if="activeTab === 1" class="tab-panel">
+            <view class="section-card reading-card">
+              <view class="section-head compact">
+                <text class="section-title">原文内容</text>
               </view>
-              <view class="bilingual-block en-block">
-                <text class="bilingual-lang">🇺🇸 English</text>
-                <text class="bilingual-text">{{ article.contentEn }}</text>
-              </view>
-            </view>
-            <view v-else class="no-content">
-              <text class="no-content-icon">🌐</text>
-              <text class="no-content-text">暂无英文版本</text>
+              <text class="article-content">{{ article.content }}</text>
             </view>
           </view>
 
-          <view class="bottom-pad" />
+          <view v-if="activeTab === 2" class="tab-panel">
+            <view v-if="article.contentEn" class="bilingual-stack">
+              <view class="section-card bilingual-card">
+                <text class="lang-label">中文</text>
+                <text class="article-content">{{ article.content }}</text>
+              </view>
+              <view class="section-card bilingual-card">
+                <text class="lang-label english">English</text>
+                <text class="article-content">{{ article.contentEn }}</text>
+              </view>
+            </view>
+            <view v-else class="section-card empty-card">
+              <text class="empty-title">暂无双语内容</text>
+              <text class="empty-desc">当前文章还没有英文对照版本，你可以先查看 AI 解读或原文内容。</text>
+            </view>
+          </view>
+
+          <view class="article-bottom-gap" />
         </view>
       </scroll-view>
 
-      <!-- 底部操作栏 -->
-      <view class="action-bar">
+      <view class="bottom-action-bar">
         <view
-          class="action-btn"
-          :style="{ background: article.isLiked ? '#E8F8EE' : '#F5F5F5', color: article.isLiked ? '#1DB954' : '#666' }"
+          class="bottom-action-btn"
+          :class="{ active: article.isLiked }"
           @tap="store.toggleLike(article.id)"
         >
-          <text class="action-icon">👍</text>
-          <text class="action-label">{{ article.likeCount }}</text>
+          <text class="bottom-action-icon">赞</text>
+          <text class="bottom-action-text">{{ article.likeCount }}</text>
         </view>
         <view
-          class="action-btn"
-          :style="{ background: article.isCollected ? '#FFF7E6' : '#F5F5F5', color: article.isCollected ? '#FA8C16' : '#666' }"
+          class="bottom-action-btn"
+          :class="{ active: article.isCollected }"
           @tap="store.toggleCollect(article.id)"
         >
-          <text class="action-icon">⭐</text>
-          <text class="action-label">{{ article.isCollected ? '已收藏' : '收藏' }}</text>
+          <text class="bottom-action-icon">藏</text>
+          <text class="bottom-action-text">{{ article.isCollected ? '已收藏' : '收藏' }}</text>
         </view>
-        <view class="action-btn" style="background: #F5F5F5; color: #666;" @tap="onShare">
-          <text class="action-icon">↗</text>
-          <text class="action-label">分享</text>
+        <view class="bottom-action-btn" @tap="onShare">
+          <text class="bottom-action-icon">发</text>
+          <text class="bottom-action-text">分享</text>
         </view>
-        <view class="ai-btn" @tap="openAiDrawer('')">
-          <text class="ai-btn-icon">🤖</text>
-          <text class="ai-btn-label">问 AI</text>
+        <view class="ask-ai-btn" @tap="openAiDrawer('')">
+          <text class="ask-ai-btn-text">问 AI</text>
         </view>
       </view>
     </view>
 
-    <!-- 文章不存在 -->
-    <view v-else class="no-article">
-      <text class="no-article-icon">📄</text>
-      <text class="no-article-text">文章不存在</text>
-      <view class="no-article-btn" @tap="goBack">
+    <view v-else class="empty-page">
+      <text class="empty-page-title">文章不存在</text>
+      <text class="empty-page-desc">当前没有可展示的资讯内容，请返回上一页重新选择。</text>
+      <view class="empty-page-btn" @tap="goBack">
         <text>返回</text>
       </view>
     </view>
 
-    <!-- AI 问答抽屉 -->
-    <view v-if="aiDrawerOpen" class="overlay" @tap="aiDrawerOpen = false">
+    <view v-if="aiDrawerOpen" class="drawer-mask" @tap="aiDrawerOpen = false">
       <view class="ai-drawer" @tap.stop>
         <view class="drawer-handle" />
-        <view class="drawer-content">
+        <view class="drawer-inner">
           <view class="drawer-header">
-            <view class="drawer-header-left">
-              <view class="drawer-ai-avatar">
-                <text class="drawer-ai-icon">🤖</text>
+            <view class="drawer-title-block">
+              <view class="drawer-badge">
+                <text class="drawer-badge-text">AI</text>
               </view>
-              <view class="drawer-header-info">
+              <view class="drawer-title-copy">
                 <text class="drawer-title">向 AI 提问</text>
                 <text class="drawer-subtitle">基于当前文章内容回答</text>
               </view>
             </view>
             <view class="drawer-close" @tap="aiDrawerOpen = false">
-              <text>✕</text>
+              <text>×</text>
             </view>
           </view>
 
-          <!-- 当前问题 -->
-          <view v-if="currentQuestion" class="current-question">
-            <text class="current-q-label">当前问题：</text>
-            <text class="current-q-text">{{ currentQuestion }}</text>
+          <view v-if="currentQuestion" class="current-question-box">
+            <text class="current-question-label">当前问题</text>
+            <text class="current-question-text">{{ currentQuestion }}</text>
           </view>
 
-          <!-- AI 回答 -->
-          <view class="ai-answer-area">
-            <view v-if="isAiLoading" class="ai-loading">
-              <text class="loading-dots">AI 正在思考中</text>
+          <view class="answer-panel">
+            <view v-if="isAiLoading" class="answer-state">
+              <text class="answer-state-text">AI 正在思考中…</text>
             </view>
-            <view v-else-if="aiAnswer" class="ai-answer">
-              <text class="ai-answer-text">{{ aiAnswer }}</text>
+            <view v-else-if="aiAnswer" class="answer-result">
+              <text class="answer-result-text">{{ aiAnswer }}</text>
             </view>
-            <view v-else class="ai-placeholder">
-              <text class="ai-placeholder-text">选择下方问题或输入你的问题</text>
+            <view v-else class="answer-state">
+              <text class="answer-state-text">选择下方问题，或输入你想继续追问的内容。</text>
             </view>
           </view>
 
-          <!-- 预设问题 -->
-          <view class="preset-questions">
+          <view class="preset-area">
             <text class="preset-title">相关问题</text>
             <view
               v-for="q in article?.aiQuestions ?? []"
               :key="q"
-              class="preset-q-btn"
+              class="preset-btn"
               @tap="askQuestion(q)"
             >
-              <text class="preset-q-text">{{ q }}</text>
+              <text class="preset-btn-text">{{ q }}</text>
             </view>
           </view>
 
-          <!-- 输入框 -->
-          <view class="ai-input-row">
+          <view class="drawer-input-row">
             <input
               v-model="inputQuestion"
-              class="ai-input"
-              placeholder="输入你的问题..."
+              class="drawer-input"
+              placeholder="输入你的问题"
               :adjust-position="true"
               @confirm="askQuestion(inputQuestion)"
             />
-            <view class="ai-send-btn" @tap="askQuestion(inputQuestion)">
-              <text>发送</text>
+            <view class="drawer-send-btn" @tap="askQuestion(inputQuestion)">
+              <text class="drawer-send-btn-text">发送</text>
             </view>
           </view>
-          <view class="drawer-bottom-pad" />
+          <view class="drawer-safe-gap" />
         </view>
       </view>
     </view>
@@ -272,16 +259,16 @@ import { useAppStore } from '../../store/useAppStore'
 const TABS = ['AI 解读', '原文', '双语对照']
 
 const DOMAIN_MAP: Record<string, { label: string; color: string; bg: string }> = {
-  tech: { label: '科技', color: '#1677FF', bg: '#E6F4FF' },
-  finance: { label: '财经', color: '#FA8C16', bg: '#FFF7E6' },
-  policy: { label: '政策', color: '#52C41A', bg: '#F6FFED' },
-  commerce: { label: '商情', color: '#EB2F96', bg: '#FFF0F6' },
+  tech: { label: '科技', color: '#1677FF', bg: '#EAF3FF' },
+  finance: { label: '财经', color: '#D97706', bg: '#FFF5E8' },
+  policy: { label: '政策', color: '#16A34A', bg: '#ECFDF3' },
+  commerce: { label: '商情', color: '#BE185D', bg: '#FFF0F6' },
 }
 
 const SENTIMENT_MAP: Record<string, { label: string; color: string; bg: string }> = {
-  positive: { label: '利好', color: '#52C41A', bg: '#F6FFED' },
-  negative: { label: '利空', color: '#FF4D4F', bg: '#FFF1F0' },
-  neutral: { label: '中性', color: '#8C8C8C', bg: '#F5F5F5' },
+  positive: { label: '利好', color: '#16A34A', bg: '#ECFDF3' },
+  negative: { label: '利空', color: '#DC2626', bg: '#FEF2F2' },
+  neutral: { label: '中性', color: '#6B7280', bg: '#F3F4F6' },
 }
 
 const store = useAppStore()
@@ -292,7 +279,7 @@ const aiAnswer = ref('')
 const isAiLoading = ref(false)
 const inputQuestion = ref('')
 
-const article = computed(() => store.currentArticle)
+const article = computed(() => store.currentArticle ?? store.articles[0] ?? null)
 
 const domainInfo = computed(() =>
   article.value ? (DOMAIN_MAP[article.value.domain] ?? { label: '其他', color: '#666', bg: '#F5F5F5' }) : { label: '', color: '', bg: '' }
@@ -304,9 +291,9 @@ const sentimentInfo = computed(() =>
 
 const scoreColor = computed(() => {
   const s = article.value?.aiScore ?? 0
-  if (s >= 88) return '#FF4D4F'
-  if (s >= 75) return '#FA8C16'
-  return '#1DB954'
+  if (s >= 88) return '#DC2626'
+  if (s >= 75) return '#D97706'
+  return '#16A34A'
 })
 
 function goBack() {
@@ -328,7 +315,7 @@ async function askQuestion(q: string) {
   aiAnswer.value = ''
   await new Promise(r => setTimeout(r, 1200))
   isAiLoading.value = false
-  aiAnswer.value = `关于「${q}」的 AI 分析：\n\n这是一个模拟的 AI 回答。在实际版本中，AI 将基于文章内容和实时数据，为您提供深度分析和专业解读。\n\n主要观点：\n1. 该事件对相关行业具有重要影响\n2. 建议关注后续政策动向\n3. 可结合雷达词追踪相关进展`
+  aiAnswer.value = `关于「${q}」的 AI 分析：\n\n这是一个模拟的 AI 回答。在正式版本中，AI 会结合文章内容与上下文，为你给出更聚焦的解读与建议。\n\n你可以重点继续关注：\n1. 这条资讯对行业供需和竞争格局的影响；\n2. 是否存在后续政策、产品或资本层面的连锁变化；\n3. 是否值得纳入你的雷达词长期追踪。`
 }
 
 function onShare() {
@@ -338,663 +325,672 @@ function onShare() {
 
 <style scoped>
 .article-page {
+  height: 100%;
+  min-height: 0;
+  background: #F4F6F8;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  background: #fff;
-}
-
-/* 导航栏 */
-.nav-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14rpx 28rpx;
-  background: #fff;
-  border-bottom: 1rpx solid #F0F0F0;
-  flex-shrink: 0;
-}
-
-.nav-back {
-  width: 64rpx;
-  height: 64rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.back-icon {
-  font-size: 48rpx;
-  color: #333;
-  font-weight: 300;
-}
-
-.nav-title {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #1A1A1A;
-}
-
-.nav-placeholder {
-  width: 64rpx;
-}
-
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-}
-
-.nav-action-btn {
-  width: 64rpx;
-  height: 64rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nav-action-icon {
-  font-size: 36rpx;
-  color: #666;
-}
-
-/* 内容区 */
-.content-scroll {
-  flex: 1;
   overflow: hidden;
 }
 
-.content-inner {
-  padding: 28rpx 28rpx 0;
-}
-
-/* 标签行 */
-.tags-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12rpx;
-  margin-bottom: 24rpx;
-}
-
-.tag {
-  font-size: 22rpx;
-  padding: 6rpx 18rpx;
-  border-radius: 10rpx;
-  font-weight: 500;
-}
-
-.radar-tag {
-  color: #7C3AED;
-  background: #F5F0FF;
-}
-
-/* 标题 */
-.article-title {
-  font-size: 34rpx;
-  font-weight: 700;
-  color: #111;
-  line-height: 1.55;
-  display: block;
-  margin-bottom: 16rpx;
-}
-
-/* 元信息 */
-.meta-row {
-  display: flex;
-  align-items: center;
-  gap: 10rpx;
-  margin-bottom: 32rpx;
-  flex-wrap: wrap;
-}
-
-.meta-text {
-  font-size: 24rpx;
-  color: #AAAAAA;
-}
-
-.meta-sep {
-  font-size: 24rpx;
-  color: #CCCCCC;
-}
-
-.meta-translated {
-  font-size: 24rpx;
-  color: #1677FF;
-}
-
-.ai-translated-tag {
-  color: #1677FF;
-  background: #E6F4FF;
-}
-
-.score-badge {
-  margin-left: auto;
-  width: 64rpx;
-  height: 64rpx;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.score-num {
-  color: #fff;
-  font-size: 24rpx;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.score-unit {
-  color: #fff;
-  font-size: 18rpx;
-  opacity: 0.85;
-  line-height: 1;
-}
-
-/* 内容 Tab */
-.content-tabs {
-  display: flex;
-  border-bottom: 1rpx solid #F0F0F0;
-  margin-bottom: 32rpx;
-}
-
-.content-tab {
-  padding: 16rpx 32rpx;
-  font-size: 28rpx;
-  color: #888;
-  border-bottom: 4rpx solid transparent;
-  margin-bottom: -1rpx;
-}
-
-.content-tab.active {
-  color: #1DB954;
-  border-bottom-color: #1DB954;
-  font-weight: 600;
-}
-
-/* AI 卡片 */
-.tab-content {
-  display: flex;
-  flex-direction: column;
-  gap: 24rpx;
-}
-
-.ai-card {
-  background: #F8F9FA;
-  border-radius: 16rpx;
-  padding: 24rpx;
-}
-
-.ai-summary-card {
-  background: linear-gradient(135deg, #E8F8EE 0%, #F0FDF4 100%);
-  border: 1.5rpx solid #BBF7D0;
-}
-
-.ai-title-green {
-  color: #1DB954 !important;
-}
-
-.ai-card-header {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  margin-bottom: 20rpx;
-}
-
-.ai-card-icon {
-  font-size: 32rpx;
-}
-
-.ai-card-title {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #1A1A1A;
-}
-
-.ai-summary-text {
-  font-size: 28rpx;
-  color: #444;
-  line-height: 1.8;
-  display: block;
-}
-
-.key-point-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 16rpx;
-  margin-bottom: 16rpx;
-}
-
-.key-point-item:last-child {
-  margin-bottom: 0;
-}
-
-.key-point-num {
-  width: 36rpx;
-  height: 36rpx;
-  border-radius: 50%;
-  background: #1DB954;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.key-point-num text {
-  color: #fff;
-  font-size: 22rpx;
-  font-weight: 700;
-}
-
-.key-point-text {
-  font-size: 26rpx;
-  color: #444;
-  line-height: 1.6;
-  flex: 1;
-  display: block;
-}
-
-.tags-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12rpx;
-}
-
-.tag-chip {
-  padding: 8rpx 20rpx;
-  border-radius: 20rpx;
-  background: #E8F8EE;
-  font-size: 24rpx;
-  color: #1DB954;
-}
-
-.ai-question-btn {
+.article-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20rpx 24rpx;
-  background: #fff;
-  border-radius: 16rpx;
-  margin-bottom: 12rpx;
-  border: 1rpx solid #E8F8EE;
-}
-
-.ai-question-btn:last-child {
-  margin-bottom: 0;
-}
-
-.ai-q-text {
-  font-size: 26rpx;
-  color: #444;
-  flex: 1;
-}
-
-.ai-q-arrow {
-  font-size: 28rpx;
-  color: #1DB954;
+  gap: 16rpx;
+  padding: 14rpx 24rpx;
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1rpx solid #E5EAF0;
   flex-shrink: 0;
 }
 
-/* 原文 */
-.article-content {
-  font-size: 30rpx;
-  color: #333;
-  line-height: 1.9;
-  white-space: pre-wrap;
-  display: block;
+.nav-left,
+.nav-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F1F5F9;
+  border-radius: 18rpx;
 }
 
-/* 双语 */
-.bilingual-block {
-  border-radius: 16rpx;
-  padding: 24rpx;
-  margin-bottom: 20rpx;
+.nav-left {
+  width: 64rpx;
+  height: 64rpx;
+  flex-shrink: 0;
 }
 
-.cn-block {
-  background: #EFF6FF;
-  border: 1rpx solid #DBEAFE;
+.nav-left-icon {
+  font-size: 46rpx;
+  font-weight: 300;
+  color: #334155;
 }
 
-.en-block {
-  background: #F9F9F9;
-  border: 1rpx solid #E5E7EB;
+.nav-title {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-size: 31rpx;
+  font-weight: 700;
+  color: #0F172A;
 }
 
-.bilingual-lang {
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.nav-icon-btn {
+  min-width: 64rpx;
+  height: 64rpx;
+  padding: 0 16rpx;
+}
+
+.nav-icon-btn.active {
+  background: #FFF7ED;
+}
+
+.nav-icon-text {
   font-size: 22rpx;
-  font-weight: 600;
-  color: #888;
+  font-weight: 700;
+  color: #475569;
+}
+
+.article-main {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.article-scroll {
+  flex: 1;
+  min-height: 0;
+}
+
+.article-inner {
+  padding: 18rpx 24rpx calc(168rpx + env(safe-area-inset-bottom));
+}
+
+.headline-card,
+.section-card {
+  background: #FFFFFF;
+  border: 1rpx solid #E5EAF0;
+  border-radius: 24rpx;
+}
+
+.headline-card {
+  padding: 24rpx;
+}
+
+.headline-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+
+.tag-chip,
+.score-chip,
+.minor-tag {
+  height: 48rpx;
+  padding: 0 16rpx;
+  border-radius: 999rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tag-chip text,
+.score-chip text,
+.minor-tag text {
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.plain-chip {
+  color: #475569;
+  background: #F1F5F9;
+}
+
+.ai-chip {
+  color: #0F766E;
+  background: #ECFEFF;
+}
+
+.radar-chip {
+  color: #7C3AED;
+  background: #F5F3FF;
+}
+
+.article-title {
   display: block;
+  margin-top: 18rpx;
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.45;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 18rpx;
+}
+
+.meta-text,
+.meta-dot {
+  font-size: 23rpx;
+  color: #94A3B8;
+}
+
+.score-chip {
+  margin-left: auto;
+}
+
+.summary-box {
+  margin-top: 20rpx;
+  padding: 20rpx;
+  border-radius: 20rpx;
+  background: #F8FAFC;
+}
+
+.summary-label {
+  display: block;
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #16A34A;
+}
+
+.summary-text {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 26rpx;
+  line-height: 1.8;
+  color: #334155;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 12rpx;
+  margin: 18rpx 0;
+}
+
+.tab-item {
+  flex: 1;
+  height: 68rpx;
+  border-radius: 999rpx;
+  background: #EDF2F7;
+  color: #64748B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-item text {
+  font-size: 25rpx;
+  font-weight: 600;
+}
+
+.tab-item.active {
+  background: #E8F8EE;
+  color: #16A34A;
+}
+
+.tab-panel,
+.bilingual-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.section-card {
+  padding: 24rpx;
+}
+
+.section-hero {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FBF9 100%);
+}
+
+.section-head {
+  margin-bottom: 18rpx;
+}
+
+.section-head.compact {
   margin-bottom: 16rpx;
 }
 
-.bilingual-text {
-  font-size: 28rpx;
-  color: #333;
-  line-height: 1.8;
-  white-space: pre-wrap;
+.section-title {
   display: block;
+  font-size: 29rpx;
+  font-weight: 700;
+  color: #0F172A;
 }
 
-/* 无内容 */
-.no-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 80rpx 0;
+.section-sub {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #94A3B8;
+  line-height: 1.6;
 }
 
-.no-content-icon {
-  font-size: 80rpx;
-  margin-bottom: 20rpx;
-}
-
-.no-content-text {
+.section-body,
+.article-content,
+.answer-result-text {
   font-size: 28rpx;
-  color: #AAAAAA;
+  color: #334155;
+  line-height: 1.95;
+  white-space: pre-wrap;
 }
 
-.bottom-pad {
-  height: 160rpx;
-}
-
-/* 底部操作栏 */
-.action-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #fff;
-  border-top: 1rpx solid #F0F0F0;
+.point-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 16rpx;
-  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
-  flex-shrink: 0;
 }
 
-.action-btn {
+.point-row + .point-row {
+  margin-top: 18rpx;
+}
+
+.point-index {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: #ECFDF3;
   display: flex;
   align-items: center;
-  gap: 8rpx;
-  flex: 1;
   justify-content: center;
-  padding: 16rpx 0;
-  border-radius: 20rpx;
-}
-
-.action-icon {
-  font-size: 28rpx;
-}
-
-.action-label {
-  font-size: 24rpx;
-  font-weight: 500;
-}
-
-.ai-btn {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-  padding: 16rpx 32rpx;
-  border-radius: 20rpx;
-  background: linear-gradient(135deg, #1DB954, #16a34a);
   flex-shrink: 0;
 }
 
-.ai-btn-icon {
+.point-index text {
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #16A34A;
+}
+
+.point-text {
+  flex: 1;
+  font-size: 27rpx;
+  color: #334155;
+  line-height: 1.8;
+}
+
+.tag-list-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.minor-tag {
+  background: #F1F5F9;
+}
+
+.minor-tag text {
+  color: #475569;
+}
+
+.ask-row {
+  min-height: 88rpx;
+  padding: 0 22rpx;
+  border-radius: 20rpx;
+  background: #F8FAFC;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.ask-row + .ask-row {
+  margin-top: 14rpx;
+}
+
+.ask-row-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: #334155;
+  line-height: 1.6;
+}
+
+.ask-row-arrow {
   font-size: 28rpx;
+  color: #CBD5E1;
 }
 
-.ai-btn-label {
+.lang-label {
+  display: block;
+  margin-bottom: 14rpx;
+  font-size: 23rpx;
+  font-weight: 700;
+  color: #16A34A;
+}
+
+.lang-label.english {
+  color: #2563EB;
+}
+
+.empty-card {
+  text-align: center;
+}
+
+.empty-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #334155;
+}
+
+.empty-desc {
+  display: block;
+  margin-top: 12rpx;
   font-size: 24rpx;
-  font-weight: 600;
-  color: #fff;
+  color: #94A3B8;
+  line-height: 1.7;
 }
 
-/* 无文章 */
-.no-article {
+.article-bottom-gap {
+  height: calc(132rpx + env(safe-area-inset-bottom));
+}
+
+.bottom-action-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.98);
+  border-top: 1rpx solid #E5EAF0;
+  box-shadow: 0 -8rpx 24rpx rgba(15, 23, 42, 0.06);
+  box-sizing: border-box;
+}
+
+.bottom-action-btn {
+  flex: 1;
+  height: 72rpx;
+  border-radius: 999rpx;
+  background: #F1F5F9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  color: #64748B;
+}
+
+.bottom-action-btn.active {
+  background: #ECFDF3;
+  color: #16A34A;
+}
+
+.bottom-action-icon,
+.bottom-action-text {
+  font-size: 23rpx;
+  font-weight: 700;
+}
+
+.ask-ai-btn {
+  min-width: 150rpx;
+  height: 72rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+  box-shadow: 0 12rpx 24rpx rgba(34, 197, 94, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ask-ai-btn-text {
+  font-size: 25rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.empty-page {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80rpx;
+  text-align: center;
+  padding: 0 56rpx;
 }
 
-.no-article-icon {
-  font-size: 80rpx;
-  margin-bottom: 20rpx;
+.empty-page-title {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #334155;
 }
 
-.no-article-text {
-  font-size: 28rpx;
-  color: #AAAAAA;
-  margin-bottom: 40rpx;
+.empty-page-desc {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #94A3B8;
+  line-height: 1.7;
 }
 
-.no-article-btn {
-  padding: 16rpx 48rpx;
-  border-radius: 40rpx;
-  background: #1DB954;
-  color: #fff;
-  font-size: 28rpx;
+.empty-page-btn {
+  margin-top: 30rpx;
+  min-width: 180rpx;
+  height: 76rpx;
+  border-radius: 999rpx;
+  background: #16A34A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* AI 抽屉 */
-.overlay {
+.empty-page-btn text {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.drawer-mask {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 200;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.38);
+  z-index: 100;
   display: flex;
   align-items: flex-end;
 }
 
 .ai-drawer {
-  background: #fff;
-  border-radius: 40rpx 40rpx 0 0;
   width: 100%;
-  max-height: 85vh;
-  display: flex;
-  flex-direction: column;
+  max-height: 82vh;
+  background: #FFFFFF;
+  border-radius: 36rpx 36rpx 0 0;
 }
 
 .drawer-handle {
   width: 72rpx;
   height: 8rpx;
-  background: #E0E0E0;
-  border-radius: 4rpx;
-  margin: 24rpx auto 0;
-  flex-shrink: 0;
+  border-radius: 999rpx;
+  background: #D5DCE3;
+  margin: 22rpx auto 0;
 }
 
-.drawer-content {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  padding: 24rpx 32rpx 0;
+.drawer-inner {
+  padding: 18rpx 24rpx 0;
 }
 
 .drawer-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24rpx;
-  flex-shrink: 0;
-}
-
-.drawer-header-left {
-  display: flex;
-  align-items: center;
   gap: 16rpx;
 }
 
-.drawer-ai-avatar {
-  width: 56rpx;
-  height: 56rpx;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #1DB954, #0ea5e9);
+.drawer-title-block {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+
+.drawer-badge {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 20rpx;
+  background: #E8F8EE;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
-.drawer-ai-icon {
-  font-size: 28rpx;
+.drawer-badge-text {
+  font-size: 24rpx;
+  font-weight: 800;
+  color: #16A34A;
 }
 
-.drawer-header-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4rpx;
+.drawer-title-copy {
+  min-width: 0;
 }
 
 .drawer-title {
-  font-size: 28rpx;
+  display: block;
+  font-size: 30rpx;
   font-weight: 700;
-  color: #1A1A1A;
+  color: #0F172A;
 }
 
 .drawer-subtitle {
+  display: block;
+  margin-top: 6rpx;
   font-size: 22rpx;
-  color: #AAAAAA;
+  color: #94A3B8;
 }
 
 .drawer-close {
   width: 56rpx;
   height: 56rpx;
   border-radius: 50%;
-  background: #F5F5F5;
+  background: #F1F5F9;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24rpx;
-  color: #888;
 }
 
-.current-question {
-  background: #F0FDF4;
-  border-radius: 16rpx;
-  padding: 20rpx 24rpx;
-  margin-bottom: 20rpx;
-  flex-shrink: 0;
-}
-
-.current-q-label {
-  font-size: 22rpx;
-  color: #888;
-  display: block;
-  margin-bottom: 8rpx;
-}
-
-.current-q-text {
-  font-size: 26rpx;
-  color: #1A1A1A;
-  font-weight: 500;
-  display: block;
-}
-
-.ai-answer-area {
-  flex: 1;
-  overflow: hidden;
-  margin-bottom: 20rpx;
-}
-
-.ai-loading {
-  padding: 40rpx;
-  text-align: center;
-}
-
-.loading-dots {
-  font-size: 26rpx;
-  color: #888;
-}
-
-.ai-answer {
-  background: #F9F9F9;
-  border-radius: 16rpx;
-  padding: 24rpx;
-}
-
-.ai-answer-text {
+.drawer-close text {
   font-size: 28rpx;
-  color: #333;
-  line-height: 1.8;
-  white-space: pre-wrap;
+  color: #64748B;
+}
+
+.current-question-box,
+.answer-panel,
+.preset-area {
+  margin-top: 18rpx;
+}
+
+.current-question-box {
+  padding: 20rpx;
+  border-radius: 20rpx;
+  background: #F8FAFC;
+}
+
+.current-question-label {
   display: block;
+  margin-bottom: 10rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #16A34A;
 }
 
-.ai-placeholder {
-  padding: 40rpx;
-  text-align: center;
-}
-
-.ai-placeholder-text {
+.current-question-text {
+  display: block;
   font-size: 26rpx;
-  color: #CCCCCC;
+  color: #334155;
+  line-height: 1.7;
 }
 
-.preset-questions {
-  flex-shrink: 0;
-  margin-bottom: 20rpx;
+.answer-panel {
+  min-height: 180rpx;
+  padding: 22rpx;
+  border-radius: 20rpx;
+  background: #F8FAFC;
+}
+
+.answer-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 136rpx;
+}
+
+.answer-state-text {
+  font-size: 25rpx;
+  color: #94A3B8;
+  line-height: 1.7;
 }
 
 .preset-title {
-  font-size: 24rpx;
-  color: #888;
   display: block;
-  margin-bottom: 12rpx;
+  margin-bottom: 14rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #334155;
 }
 
-.preset-q-btn {
-  padding: 16rpx 20rpx;
-  background: #F5F5F5;
-  border-radius: 16rpx;
-  margin-bottom: 10rpx;
+.preset-btn {
+  min-height: 72rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 18rpx;
+  background: #F1F5F9;
 }
 
-.preset-q-text {
-  font-size: 26rpx;
-  color: #444;
+.preset-btn + .preset-btn {
+  margin-top: 12rpx;
 }
 
-.ai-input-row {
+.preset-btn-text {
+  font-size: 25rpx;
+  color: #334155;
+  line-height: 1.6;
+}
+
+.drawer-input-row {
   display: flex;
-  gap: 16rpx;
   align-items: center;
-  flex-shrink: 0;
+  gap: 12rpx;
+  margin-top: 18rpx;
 }
 
-.ai-input {
+.drawer-input {
   flex: 1;
-  height: 72rpx;
-  background: #F5F5F5;
-  border-radius: 36rpx;
+  height: 76rpx;
   padding: 0 24rpx;
+  border-radius: 999rpx;
+  background: #F8FAFC;
   font-size: 26rpx;
-  color: #333;
+  color: #111827;
 }
 
-.ai-send-btn {
-  padding: 16rpx 32rpx;
-  background: #1DB954;
-  border-radius: 36rpx;
-  font-size: 26rpx;
-  color: #fff;
-  font-weight: 600;
-  flex-shrink: 0;
+.drawer-send-btn {
+  min-width: 112rpx;
+  height: 76rpx;
+  border-radius: 999rpx;
+  background: #16A34A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.drawer-bottom-pad {
-  height: 40rpx;
+.drawer-send-btn-text {
+  font-size: 25rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.drawer-safe-gap {
+  height: 28rpx;
 }
 </style>

@@ -5,7 +5,7 @@
       "style": {
         "navigationBarTitleText": "欢迎使用微澜",
         "navigationStyle": "custom",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#F4F6F8"
       }
     },
     {
@@ -13,7 +13,7 @@
       "style": {
         "navigationBarTitleText": "微澜",
         "navigationStyle": "custom",
-        "backgroundColor": "#F5F5F5"
+        "backgroundColor": "#F4F6F8"
       }
     },
     {
@@ -21,7 +21,7 @@
       "style": {
         "navigationBarTitleText": "搜索",
         "navigationStyle": "custom",
-        "backgroundColor": "#F5F5F5"
+        "backgroundColor": "#F4F6F8"
       }
     },
     {
@@ -29,7 +29,7 @@
       "style": {
         "navigationBarTitleText": "偏好设置",
         "navigationStyle": "custom",
-        "backgroundColor": "#F5F5F5"
+        "backgroundColor": "#F4F6F8"
       }
     },
     {
@@ -37,7 +37,7 @@
       "style": {
         "navigationBarTitleText": "我的",
         "navigationStyle": "custom",
-        "backgroundColor": "#F5F5F5"
+        "backgroundColor": "#F4F6F8"
       }
     },
     {
@@ -45,15 +45,15 @@
       "style": {
         "navigationBarTitleText": "资讯详情",
         "navigationStyle": "custom",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#F4F6F8"
       }
     }
   ],
   "tabBar": {
-    "color": "#999999",
-    "selectedColor": "#1DB954",
+    "color": "#94A3B8",
+    "selectedColor": "#16A34A",
     "backgroundColor": "#FFFFFF",
-    "borderStyle": "white",
+    "borderStyle": "black",
     "list": [
       {
         "pagePath": "pages/feed/index",
@@ -85,7 +85,7 @@
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "微澜 PulseRead",
     "navigationBarBackgroundColor": "#FFFFFF",
-    "backgroundColor": "#F5F5F5",
+    "backgroundColor": "#F4F6F8",
     "backgroundTextStyle": "light"
   }
 }

@@ -5,6 +5,21 @@ import { useAppStore } from "./store/useAppStore"
 onLaunch(() => {
   const store = useAppStore()
   store.init()
+
+  // H5 预览场景下，如果地址中已经带了具体页面路由，就不要在启动时强制改写路由。
+  // 否则会出现明明打开的是个人页/偏好页链接，却被重新跳回欢迎页或首页的情况。
+  // #/pages/feed/index、#/pages/profile/index 等都应直接保留。
+  // 只有在根路径预览时，才根据引导状态决定进入欢迎页还是首页。
+  // #/ 或空 hash 视为根路径。
+  // #/pages/... 视为明确页面路径。
+  // 非 H5 端维持原有行为。
+  // eslint-disable-next-line no-undef
+  const isH5 = typeof window !== 'undefined'
+  const currentHash = isH5 ? (window.location.hash || '') : ''
+  const hasExplicitRoute = /^#\/pages\//.test(currentHash)
+
+  if (hasExplicitRoute) return
+
   if (!store.hasOnboarded) {
     uni.reLaunch({ url: "/pages/onboarding/index" })
   } else {

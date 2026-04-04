@@ -1,30 +1,48 @@
 <template>
   <view class="pref-page">
-    <!-- 导航栏 -->
-    <view class="nav-bar">
-      <text class="nav-title">偏好设置</text>
+    <view class="top-shell">
+      <view class="nav-bar">
+        <view>
+          <text class="nav-title">阅读偏好</text>
+          <text class="nav-subtitle">管理关注领域、阅读密度与雷达词</text>
+        </view>
+      </view>
+
+      <view class="preference-summary">
+        <view class="summary-item">
+          <text class="summary-num">{{ localDomains.length }}</text>
+          <text class="summary-label">已关注领域</text>
+        </view>
+        <view class="summary-divider" />
+        <view class="summary-item">
+          <text class="summary-num">{{ localRadarWords.length }}</text>
+          <text class="summary-label">雷达词</text>
+        </view>
+        <view class="summary-divider" />
+        <view class="summary-item">
+          <text class="summary-num summary-text">{{ currentNoiseLabel }}</text>
+          <text class="summary-label">阅读密度</text>
+        </view>
+      </view>
     </view>
 
     <scroll-view scroll-y class="content-scroll">
-      <!-- 降噪档位 -->
-      <view class="section">
+      <view class="section-card">
         <view class="section-header">
-          <text class="section-title">降噪档位</text>
-          <text class="section-sub">控制每日资讯密度</text>
+          <view>
+            <text class="section-title">阅读密度</text>
+            <text class="section-sub">决定你每天看到的资讯量与筛选强度</text>
+          </view>
         </view>
         <view class="noise-list">
           <view
             v-for="level in NOISE_LEVEL_CONFIGS"
             :key="level.key"
             class="noise-item"
-            :style="{
-              borderColor: localNoiseLevel === level.key ? '#1DB954' : '#EBEBEB',
-              background: localNoiseLevel === level.key ? '#E8F8EE' : '#FAFAFA',
-            }"
+            :class="{ active: localNoiseLevel === level.key }"
             @tap="localNoiseLevel = level.key"
           >
-            <text class="noise-icon">{{ level.icon }}</text>
-            <view class="noise-text">
+            <view class="noise-main">
               <view class="noise-label-row">
                 <text class="noise-label">{{ level.label }}</text>
                 <view v-if="level.recommended" class="rec-badge">
@@ -32,82 +50,82 @@
                 </view>
               </view>
               <text class="noise-desc">{{ level.description }}</text>
-              <text class="noise-count" style="color: #1DB954;">{{ level.dailyCount }}</text>
+              <text class="noise-count">{{ level.dailyCount }}</text>
             </view>
-            <view
-              class="noise-radio"
-              :style="{ borderColor: localNoiseLevel === level.key ? '#1DB954' : '#D0D0D0' }"
-            >
+            <view class="noise-radio">
               <view v-if="localNoiseLevel === level.key" class="noise-radio-inner" />
             </view>
           </view>
         </view>
       </view>
 
-      <!-- 订阅领域 -->
-      <view class="section">
+      <view class="section-card">
         <view class="section-header">
-          <text class="section-title">订阅领域</text>
-          <text class="section-sub">至少选择 1 个</text>
+          <view>
+            <text class="section-title">关注领域</text>
+            <text class="section-sub">至少保留一个领域，首页会按你的选择推荐内容</text>
+          </view>
         </view>
         <view class="domain-grid">
           <view
             v-for="domain in DOMAIN_CONFIGS"
             :key="domain.key"
             class="domain-card"
-            :style="{
-              borderColor: localDomains.includes(domain.key) ? domain.color : '#EBEBEB',
-              background: localDomains.includes(domain.key) ? domain.bgColor : '#FAFAFA',
-            }"
+            :class="{ active: localDomains.includes(domain.key) }"
+            :style="localDomains.includes(domain.key) ? { borderColor: domain.color, background: domain.bgColor } : {}"
             @tap="toggleDomain(domain.key)"
           >
-            <text class="domain-icon">{{ domain.icon }}</text>
+            <view class="domain-card-top">
+              <view class="domain-pill" :style="{ color: domain.color, background: domain.bgColor }">
+                <text>{{ domain.label }}</text>
+              </view>
+              <view
+                v-if="localDomains.includes(domain.key)"
+                class="domain-check"
+                :style="{ background: domain.color }"
+              >
+                <text class="check-text">✓</text>
+              </view>
+            </view>
             <text
               class="domain-label"
-              :style="{ color: localDomains.includes(domain.key) ? domain.color : '#1A1A1A' }"
+              :style="{ color: localDomains.includes(domain.key) ? domain.color : '#0F172A' }"
             >{{ domain.label }}</text>
             <text class="domain-desc">{{ domain.description }}</text>
-            <view
-              v-if="localDomains.includes(domain.key)"
-              class="domain-check"
-              :style="{ background: domain.color }"
-            >
-              <text class="check-text">✓</text>
-            </view>
           </view>
         </view>
       </view>
 
-      <!-- 雷达词管理 -->
-      <view class="section">
+      <view class="section-card">
         <view class="section-header">
-          <text class="section-title">雷达词</text>
-          <text class="section-sub">实时追踪关键词</text>
+          <view>
+            <text class="section-title">雷达词</text>
+            <text class="section-sub">追踪公司、产品、政策或赛道关键词</text>
+          </view>
+          <text class="section-side">最多 20 个</text>
         </view>
 
-        <!-- 当前雷达词 -->
         <view class="radar-wrap">
           <view
             v-for="word in localRadarWords"
             :key="word"
             class="radar-chip"
           >
-            <text class="radar-chip-text">📡 {{ word }}</text>
+            <text class="radar-chip-text">{{ word }}</text>
             <view class="radar-chip-del" @tap="removeRadarWord(word)">
-              <text>✕</text>
+              <text>×</text>
             </view>
           </view>
           <view v-if="localRadarWords.length === 0" class="radar-empty">
-            <text>暂无雷达词，从下方添加</text>
+            <text>还没有添加雷达词，试试从下面的推荐词开始</text>
           </view>
         </view>
 
-        <!-- 添加雷达词 -->
         <view class="add-radar-row">
           <input
             v-model="newRadarWord"
             class="radar-input"
-            placeholder="输入关键词..."
+            placeholder="输入关键词，例如 OpenAI、A股、机器人"
             :maxlength="20"
             @confirm="addRadarWord"
           />
@@ -116,9 +134,8 @@
           </view>
         </view>
 
-        <!-- 推荐雷达词 -->
         <view class="suggested-section">
-          <text class="suggested-title">推荐关键词</text>
+          <text class="suggested-title">推荐词</text>
           <view class="tag-wrap">
             <view
               v-for="kw in SUGGESTED_RADAR_WORDS"
@@ -127,7 +144,7 @@
               :class="{ added: localRadarWords.includes(kw) }"
               @tap="toggleSuggestedWord(kw)"
             >
-              <text>{{ localRadarWords.includes(kw) ? '✓ ' : '+ ' }}{{ kw }}</text>
+              <text>{{ localRadarWords.includes(kw) ? '已添加 · ' : '+ ' }}{{ kw }}</text>
             </view>
           </view>
         </view>
@@ -136,14 +153,12 @@
       <view class="bottom-pad" />
     </scroll-view>
 
-    <!-- 保存按钮 -->
     <view class="save-bar">
-      <view
-        class="save-btn"
-        :class="{ changed: hasChanged }"
-        @tap="savePreference"
-      >
-        <text>{{ hasChanged ? '保存设置' : '已是最新' }}</text>
+      <view class="save-hint">
+        <text>{{ hasChanged ? '你有未保存的偏好修改' : '当前设置已同步' }}</text>
+      </view>
+      <view class="save-btn" :class="{ changed: hasChanged }" @tap="savePreference">
+        <text>{{ hasChanged ? '保存偏好' : '已保存' }}</text>
       </view>
     </view>
   </view>
@@ -170,6 +185,10 @@ const hasChanged = computed(() => {
     localNoiseLevel.value !== store.preference.noiseLevel ||
     JSON.stringify(localRadarWords.value) !== JSON.stringify(store.preference.radarWords)
   )
+})
+
+const currentNoiseLabel = computed(() => {
+  return NOISE_LEVEL_CONFIGS.find(item => item.key === localNoiseLevel.value)?.label ?? '默认'
 })
 
 function toggleDomain(key: DomainType) {
@@ -232,20 +251,74 @@ function savePreference() {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #F5F5F5;
+  background: #F4F6F8;
+}
+
+.top-shell {
+  background: #F8FBF9;
+  border-bottom-left-radius: 26rpx;
+  border-bottom-right-radius: 26rpx;
+  border-bottom: 1rpx solid #E7EDF2;
 }
 
 .nav-bar {
-  padding: 16rpx 28rpx;
-  background: #fff;
-  border-bottom: 1rpx solid #F0F0F0;
-  flex-shrink: 0;
+  padding: 24rpx 24rpx 12rpx;
 }
 
 .nav-title {
+  display: block;
   font-size: 34rpx;
   font-weight: 700;
-  color: #1A1A1A;
+  color: #0F172A;
+}
+
+.nav-subtitle {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #94A3B8;
+  line-height: 1.6;
+}
+
+.preference-summary {
+  margin: 0 24rpx 18rpx;
+  padding: 20rpx 24rpx;
+  background: #FFFFFF;
+  border: 1rpx solid #E5EAF0;
+  border-radius: 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.summary-item {
+  flex: 1;
+  text-align: center;
+}
+
+.summary-num {
+  display: block;
+  font-size: 30rpx;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #16A34A;
+}
+
+.summary-text {
+  font-size: 24rpx;
+}
+
+.summary-label {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 21rpx;
+  color: #94A3B8;
+}
+
+.summary-divider {
+  width: 1rpx;
+  height: 56rpx;
+  background: #E5EAF0;
 }
 
 .content-scroll {
@@ -253,71 +326,165 @@ function savePreference() {
   overflow: hidden;
 }
 
-.section {
-  background: #fff;
-  margin: 16rpx 0 0;
-  padding: 28rpx;
+.section-card {
+  margin: 20rpx 24rpx 0;
+  padding: 24rpx;
+  background: #FFFFFF;
+  border-radius: 22rpx;
+  border: 1rpx solid #E5EAF0;
 }
 
 .section-header {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 16rpx;
-  margin-bottom: 24rpx;
+  margin-bottom: 20rpx;
 }
 
 .section-title {
-  font-size: 30rpx;
+  display: block;
+  font-size: 28rpx;
   font-weight: 700;
-  color: #1A1A1A;
+  color: #0F172A;
 }
 
 .section-sub {
-  font-size: 24rpx;
-  color: #AAAAAA;
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #94A3B8;
+  line-height: 1.6;
 }
 
-/* 领域 */
+.section-side {
+  font-size: 21rpx;
+  color: #94A3B8;
+}
+
+.noise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.noise-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 22rpx 20rpx;
+  border-radius: 20rpx;
+  background: #F8FAFC;
+  border: 1rpx solid transparent;
+}
+
+.noise-item.active {
+  background: #F0FDF4;
+  border-color: #BBF7D0;
+}
+
+.noise-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.noise-label-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.noise-label {
+  font-size: 27rpx;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.rec-badge {
+  height: 34rpx;
+  padding: 0 12rpx;
+  border-radius: 999rpx;
+  background: #DCFCE7;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rec-text {
+  font-size: 19rpx;
+  font-weight: 700;
+  color: #15803D;
+}
+
+.noise-desc,
+.noise-count {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #94A3B8;
+}
+
+.noise-radio {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  border: 2rpx solid #CBD5E1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.noise-item.active .noise-radio {
+  border-color: #16A34A;
+}
+
+.noise-radio-inner {
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 50%;
+  background: #16A34A;
+}
+
 .domain-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20rpx;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14rpx;
 }
 
 .domain-card {
-  position: relative;
-  padding: 28rpx 24rpx;
+  padding: 20rpx;
   border-radius: 20rpx;
-  border: 3rpx solid #EBEBEB;
-  background: #FAFAFA;
+  background: #FFFFFF;
+  border: 1rpx solid #E5EAF0;
 }
 
-.domain-icon {
-  font-size: 40rpx;
-  display: block;
-  margin-bottom: 12rpx;
+.domain-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
 }
 
-.domain-label {
-  font-size: 26rpx;
-  font-weight: 600;
-  display: block;
-  margin-bottom: 8rpx;
+.domain-pill {
+  min-width: 88rpx;
+  height: 40rpx;
+  padding: 0 14rpx;
+  border-radius: 999rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.domain-desc {
-  font-size: 22rpx;
-  color: #888;
-  line-height: 1.4;
-  display: block;
+.domain-pill text {
+  font-size: 21rpx;
+  font-weight: 700;
 }
 
 .domain-check {
-  position: absolute;
-  top: 16rpx;
-  right: 16rpx;
-  width: 32rpx;
-  height: 32rpx;
+  width: 36rpx;
+  height: 36rpx;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -325,177 +492,119 @@ function savePreference() {
 }
 
 .check-text {
-  color: #fff;
-  font-size: 18rpx;
+  font-size: 21rpx;
+  color: #FFFFFF;
   font-weight: 700;
 }
 
-/* 降噪 */
-.noise-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-}
-
-.noise-item {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  padding: 24rpx;
-  border-radius: 20rpx;
-  border: 3rpx solid #EBEBEB;
-  background: #FAFAFA;
-}
-
-.noise-icon {
-  font-size: 40rpx;
-  width: 48rpx;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.noise-text {
-  flex: 1;
-}
-
-.noise-label-row {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  margin-bottom: 6rpx;
-}
-
-.noise-label {
-  font-size: 26rpx;
-  font-weight: 600;
-  color: #1A1A1A;
-}
-
-.rec-badge {
-  background: #1DB954;
-  border-radius: 8rpx;
-  padding: 2rpx 10rpx;
-}
-
-.rec-text {
-  color: #fff;
-  font-size: 18rpx;
-  font-weight: 600;
-}
-
-.noise-desc {
-  font-size: 22rpx;
-  color: #888;
+.domain-label {
   display: block;
-  margin-bottom: 4rpx;
+  font-size: 27rpx;
+  font-weight: 700;
+  color: #0F172A;
 }
 
-.noise-count {
-  font-size: 22rpx;
-  font-weight: 500;
+.domain-desc {
   display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #64748B;
+  line-height: 1.6;
 }
 
-.noise-radio {
-  width: 36rpx;
-  height: 36rpx;
-  border-radius: 50%;
-  border: 3rpx solid #D0D0D0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.noise-radio-inner {
-  width: 20rpx;
-  height: 20rpx;
-  border-radius: 50%;
-  background: #1DB954;
-}
-
-/* 雷达词 */
 .radar-wrap {
   display: flex;
   flex-wrap: wrap;
-  gap: 16rpx;
-  min-height: 60rpx;
-  margin-bottom: 24rpx;
+  gap: 12rpx;
 }
 
 .radar-chip {
-  display: flex;
+  min-height: 56rpx;
+  padding: 0 14rpx 0 18rpx;
+  border-radius: 999rpx;
+  background: #F1F5F9;
+  display: inline-flex;
   align-items: center;
-  gap: 8rpx;
-  padding: 10rpx 20rpx;
-  border-radius: 40rpx;
-  background: #F0FDF4;
-  border: 1rpx solid #BBF7D0;
+  gap: 10rpx;
 }
 
 .radar-chip-text {
-  font-size: 24rpx;
-  color: #1DB954;
+  font-size: 23rpx;
+  color: #334155;
+  font-weight: 600;
 }
 
 .radar-chip-del {
-  width: 28rpx;
-  height: 28rpx;
+  width: 30rpx;
+  height: 30rpx;
   border-radius: 50%;
-  background: #BBF7D0;
+  background: #CBD5E1;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.radar-chip-del text {
   font-size: 18rpx;
-  color: #1DB954;
+  color: #FFFFFF;
+  line-height: 1;
 }
 
 .radar-empty {
-  font-size: 24rpx;
-  color: #CCCCCC;
-  padding: 16rpx 0;
+  width: 100%;
+  padding: 24rpx 20rpx;
+  border-radius: 18rpx;
+  background: #F8FAFC;
+}
+
+.radar-empty text {
+  font-size: 22rpx;
+  color: #94A3B8;
+  line-height: 1.6;
 }
 
 .add-radar-row {
   display: flex;
-  gap: 16rpx;
-  margin-bottom: 24rpx;
+  gap: 12rpx;
+  margin-top: 18rpx;
 }
 
 .radar-input {
   flex: 1;
-  height: 72rpx;
-  background: #F5F5F5;
-  border-radius: 36rpx;
-  padding: 0 24rpx;
+  height: 74rpx;
+  padding: 0 22rpx;
+  background: #F8FAFC;
+  border: 1rpx solid #E5EAF0;
+  border-radius: 18rpx;
   font-size: 26rpx;
-  color: #333;
+  color: #0F172A;
 }
 
 .add-radar-btn {
-  padding: 0 32rpx;
-  height: 72rpx;
-  border-radius: 36rpx;
-  background: #1DB954;
+  min-width: 128rpx;
+  height: 74rpx;
+  border-radius: 18rpx;
+  background: #16A34A;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26rpx;
-  color: #fff;
-  font-weight: 600;
-  flex-shrink: 0;
+}
+
+.add-radar-btn text {
+  font-size: 25rpx;
+  color: #FFFFFF;
+  font-weight: 700;
 }
 
 .suggested-section {
-  border-top: 1rpx solid #F0F0F0;
-  padding-top: 20rpx;
+  margin-top: 20rpx;
 }
 
 .suggested-title {
-  font-size: 24rpx;
-  color: #888;
   display: block;
-  margin-bottom: 16rpx;
+  margin-bottom: 12rpx;
+  font-size: 23rpx;
+  color: #64748B;
 }
 
 .tag-wrap {
@@ -505,50 +614,77 @@ function savePreference() {
 }
 
 .suggested-tag {
-  padding: 10rpx 20rpx;
-  border-radius: 40rpx;
-  background: #F5F5F5;
-  font-size: 24rpx;
-  color: #666;
-  border: 1rpx solid #E0E0E0;
+  min-height: 54rpx;
+  padding: 0 18rpx;
+  border-radius: 999rpx;
+  background: #F8FAFC;
+  border: 1rpx solid #E5EAF0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .suggested-tag.added {
-  background: #F0FDF4;
-  color: #1DB954;
+  background: #ECFDF3;
   border-color: #BBF7D0;
 }
 
-.bottom-pad {
-  height: 160rpx;
-}
-
-/* 保存按钮 */
-.save-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 20rpx 32rpx calc(20rpx + env(safe-area-inset-bottom));
-  background: #fff;
-  border-top: 1rpx solid #F0F0F0;
-}
-
-.save-btn {
-  width: 100%;
-  height: 96rpx;
-  border-radius: 24rpx;
-  background: #C8C8C8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 30rpx;
-  color: #fff;
+.suggested-tag text {
+  font-size: 22rpx;
+  color: #475569;
   font-weight: 600;
 }
 
+.suggested-tag.added text {
+  color: #15803D;
+}
+
+.bottom-pad {
+  height: 144rpx;
+}
+
+.save-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 18rpx 24rpx calc(env(safe-area-inset-bottom) + 18rpx);
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1rpx solid #E5EAF0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.save-hint {
+  flex: 1;
+  min-width: 0;
+}
+
+.save-hint text {
+  font-size: 22rpx;
+  color: #94A3B8;
+}
+
+.save-btn {
+  min-width: 180rpx;
+  height: 72rpx;
+  border-radius: 999rpx;
+  background: #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 .save-btn.changed {
-  background: linear-gradient(135deg, #1DB954 0%, #17A348 100%);
-  box-shadow: 0 8rpx 24rpx rgba(29, 185, 84, 0.35);
+  background: #16A34A;
+}
+
+.save-btn text {
+  font-size: 25rpx;
+  color: #FFFFFF;
+  font-weight: 700;
 }
 </style>

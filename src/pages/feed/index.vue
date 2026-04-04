@@ -1,63 +1,110 @@
 <template>
   <view class="feed-page">
-    <!-- 第一行：导航栏 — 仅 Logo + 标题，右侧完全留空给胶囊按钮 -->
-    <view class="nav-bar">
-      <view class="nav-logo-icon">
-        <text class="nav-logo">🌊</text>
-      </view>
-      <text class="nav-title">微澜</text>
-    </view>
-
-    <!-- 第二行：地区 Tab + 降噪档位 -->
-    <view class="filter-bar">
-      <!-- 地区 Tab（左侧） -->
-      <view class="region-tabs">
-        <view
-          v-for="r in REGION_CONFIGS"
-          :key="r.key"
-          class="region-tab"
-          :class="{ active: selectedRegion === r.key }"
-          @tap="selectedRegion = r.key"
-        >
-          <text class="region-tab-text">{{ r.label }}</text>
-        </view>
-      </view>
-      <!-- 分隔线 -->
-      <view class="filter-divider"></view>
-      <!-- 降噪档位（右侧） -->
-      <view class="noise-badge" @tap="showNoisePicker = true">
-        <text class="noise-badge-icon">{{ currentNoiseLevelConfig?.icon }}</text>
-        <text class="noise-badge-label">{{ currentNoiseLevelConfig?.label }}</text>
-        <text class="noise-badge-arrow">▾</text>
-      </view>
-    </view>
-
-    <!-- 第三行：领域 Tab -->
-    <view class="domain-bar">
-      <scroll-view scroll-x class="domain-scroll" :show-scrollbar="false">
-        <view class="domain-tab-list">
-          <view
-            class="domain-tab"
-            :class="{ active: selectedDomain === 'all' }"
-            @tap="selectedDomain = 'all'"
-          >
-            <text>全部</text>
+    <view class="top-shell">
+      <view class="nav-bar">
+        <view class="brand-block">
+          <view class="nav-logo-icon">
+            <text class="nav-logo">澜</text>
           </view>
-          <view
-            v-for="d in subscribedDomains"
-            :key="d.key"
-            class="domain-tab"
-            :class="{ active: selectedDomain === d.key }"
-            :style="selectedDomain === d.key ? { background: d.color, color: '#fff', borderColor: d.color } : {}"
-            @tap="selectedDomain = d.key"
-          >
-            <text>{{ d.icon ? d.icon + ' ' + d.label : d.label }}</text>
+          <view class="brand-text">
+            <text class="nav-title">微澜</text>
+            <text class="nav-subtitle">筛出更值得持续关注的行业资讯</text>
           </view>
         </view>
-      </scroll-view>
+        <view class="nav-search-btn" @tap="goSearch">
+          <text class="nav-search-mark">⌕</text>
+          <text class="nav-search-text">搜索</text>
+        </view>
+      </view>
+
+      <view class="control-panel">
+        <view class="region-tabs">
+          <view
+            v-for="r in REGION_CONFIGS"
+            :key="r.key"
+            class="region-tab"
+            :class="{ active: selectedRegion === r.key }"
+            @tap="selectedRegion = r.key"
+          >
+            <text>{{ r.label }}</text>
+          </view>
+        </view>
+
+        <view class="control-row">
+          <scroll-view scroll-x class="domain-scroll" :show-scrollbar="false">
+            <view class="domain-tab-list">
+              <view
+                class="domain-tab"
+                :class="{ active: selectedDomain === 'all' }"
+                @tap="selectedDomain = 'all'"
+              >
+                <text>全部</text>
+              </view>
+              <view
+                v-for="d in subscribedDomains"
+                :key="d.key"
+                class="domain-tab"
+                :class="{ active: selectedDomain === d.key }"
+                :style="selectedDomain === d.key ? { background: d.color, color: '#FFFFFF', borderColor: d.color } : {}"
+                @tap="selectedDomain = d.key"
+              >
+                <text>{{ d.label }}</text>
+              </view>
+            </view>
+          </scroll-view>
+
+          <view class="noise-entry" @tap="showNoisePicker = true">
+            <text class="noise-entry-label">{{ currentNoiseLevelConfig?.label }}</text>
+            <text class="noise-entry-arrow">▾</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="hero-card">
+        <view class="hero-top-row">
+          <view class="hero-title-wrap">
+            <text class="hero-kicker">今日焦点</text>
+            <text class="hero-title">{{ featuredArticle?.title ?? '按你的偏好整理值得先看的内容' }}</text>
+          </view>
+          <view class="hero-count-badge">
+            <text class="hero-count-num">{{ filteredArticles.length }}</text>
+            <text class="hero-count-unit">篇</text>
+          </view>
+        </view>
+
+        <text class="hero-summary">
+          {{ featuredArticle?.aiSummary ?? '当前筛选下暂无内容，调整地区、领域或阅读密度后再查看。' }}
+        </text>
+
+        <view class="hero-meta-row">
+          <view class="meta-pill soft">
+            <text>{{ summaryText }}</text>
+          </view>
+          <view v-if="featuredArticle" class="meta-pill highlight">
+            <text>AI {{ featuredArticle.aiScore }}</text>
+          </view>
+          <view v-if="featuredArticle?.radarWords?.[0]" class="meta-pill accent">
+            <text>{{ featuredArticle.radarWords[0] }}</text>
+          </view>
+        </view>
+
+        <view class="hero-stats-grid">
+          <view class="hero-stat-card mint">
+            <text class="hero-stat-num">{{ highScoreCount }}</text>
+            <text class="hero-stat-label">高分内容</text>
+          </view>
+          <view class="hero-stat-card amber">
+            <text class="hero-stat-num">{{ radarMatchedCount }}</text>
+            <text class="hero-stat-label">雷达命中</text>
+          </view>
+          <view class="hero-stat-card blue">
+            <text class="hero-stat-num">{{ translatedCount }}</text>
+            <text class="hero-stat-label">双语资讯</text>
+          </view>
+        </view>
+      </view>
     </view>
 
-    <!-- 文章列表 -->
     <scroll-view
       scroll-y
       class="article-list"
@@ -66,36 +113,54 @@
       :refresher-triggered="isRefreshing"
       @refresherrefresh="onRefresh"
     >
-      <!-- 空状态 -->
       <view v-if="filteredArticles.length === 0" class="empty-state">
-        <text class="empty-icon">🔍</text>
         <text class="empty-title">
           {{ selectedDomain !== 'all'
-            ? `暂无「${subscribedDomains.find(d => d.key === selectedDomain)?.label ?? ''}」领域资讯`
-            : '暂无符合条件的资讯' }}
+            ? `当前没有「${subscribedDomains.find(d => d.key === selectedDomain)?.label ?? ''}」相关内容`
+            : '当前筛选下暂无资讯' }}
         </text>
         <text class="empty-desc">
-          {{ selectedDomain !== 'all'
-            ? '可以降低降噪档位，或前往偏好设置订阅更多领域'
-            : '尝试调整降噪档位或切换地区筛选' }}
+          你可以调整阅读密度、切换地区，或补充更多关注领域后再回来查看。
         </text>
         <view class="empty-actions">
           <view class="empty-btn-outline" @tap="showNoisePicker = true">
-            <text>调整降噪档位</text>
+            <text>调整阅读密度</text>
           </view>
-          <view
-            v-if="selectedDomain !== 'all'"
-            class="empty-btn-primary"
-            @tap="goPreference"
-          >
-            <text>去偏好设置</text>
+          <view v-if="selectedDomain !== 'all'" class="empty-btn-primary" @tap="goPreference">
+            <text>管理偏好</text>
           </view>
         </view>
       </view>
 
-      <!-- 文章卡片 -->
-      <view v-else>
+      <view v-else class="list-content">
         <view class="list-top-pad" />
+
+        <view class="insight-strip">
+          <view class="insight-copy">
+            <text class="insight-title">为你整理的资讯流</text>
+            <text class="insight-desc">优先展示更高相关度、更值得持续跟进的内容</text>
+          </view>
+          <view class="insight-tags">
+            <view v-if="selectedDomain !== 'all'" class="insight-chip">
+              <text>{{ currentDomainLabel }}</text>
+            </view>
+            <view class="insight-chip">
+              <text>{{ currentNoiseLevelConfig?.label }}</text>
+            </view>
+          </view>
+        </view>
+
+        <view v-if="hotKeywords.length" class="keyword-strip">
+          <text class="keyword-strip-label">今日热词</text>
+          <scroll-view scroll-x class="keyword-scroll" :show-scrollbar="false">
+            <view class="keyword-list">
+              <view v-for="word in hotKeywords" :key="word" class="keyword-chip">
+                <text>{{ word }}</text>
+              </view>
+            </view>
+          </scroll-view>
+        </view>
+
         <ArticleCard
           v-for="article in filteredArticles"
           :key="article.id"
@@ -104,39 +169,41 @@
           @like="store.toggleLike"
           @collect="store.toggleCollect"
         />
+
         <view class="list-footer">
-          <text>— 已加载全部内容 —</text>
+          <text>已经到底了，去看看别的筛选结果吧</text>
         </view>
       </view>
     </scroll-view>
 
-    <!-- 降噪选择器弹窗 -->
     <view v-if="showNoisePicker" class="overlay" @tap="showNoisePicker = false">
       <view class="noise-sheet" @tap.stop>
         <view class="sheet-handle" />
         <view class="sheet-content">
-          <text class="sheet-title">选择降噪档位</text>
+          <view class="sheet-header">
+            <text class="sheet-title">调整阅读密度</text>
+            <text class="sheet-subtitle">控制每天接收的信息量与筛选强度</text>
+          </view>
           <view
             v-for="level in NOISE_LEVEL_CONFIGS"
             :key="level.key"
             class="noise-option"
-            :style="{
-              background: store.preference.noiseLevel === level.key ? '#E8F8EE' : '#F9F9F9',
-              border: `3rpx solid ${store.preference.noiseLevel === level.key ? '#1DB954' : 'transparent'}`,
-            }"
+            :class="{ active: store.preference.noiseLevel === level.key }"
             @tap="selectNoise(level.key)"
           >
-            <text class="noise-opt-icon">{{ level.icon }}</text>
-            <view class="noise-opt-text">
-              <view class="noise-opt-label-row">
+            <view class="noise-option-main">
+              <view class="noise-label-row">
                 <text class="noise-opt-label">{{ level.label }}</text>
                 <view v-if="level.recommended" class="rec-badge">
                   <text class="rec-text">推荐</text>
                 </view>
               </view>
-              <text class="noise-opt-desc">{{ level.description }} · {{ level.dailyCount }}</text>
+              <text class="noise-opt-desc">{{ level.description }}</text>
+              <text class="noise-opt-count">{{ level.dailyCount }}</text>
             </view>
-            <text v-if="store.preference.noiseLevel === level.key" class="noise-check">✓</text>
+            <view class="noise-check-wrap">
+              <view v-if="store.preference.noiseLevel === level.key" class="noise-check-dot" />
+            </view>
           </view>
           <view class="sheet-bottom-pad" />
         </view>
@@ -184,6 +251,37 @@ const filteredArticles = computed(() => {
   })
 })
 
+const featuredArticle = computed(() => filteredArticles.value[0] ?? null)
+
+const highScoreCount = computed(() =>
+  filteredArticles.value.filter(article => article.aiScore >= 85).length
+)
+
+const radarMatchedCount = computed(() =>
+  filteredArticles.value.filter(article => article.radarWords.length > 0).length
+)
+
+const translatedCount = computed(() =>
+  filteredArticles.value.filter(article => article.isAiTranslated).length
+)
+
+const hotKeywords = computed(() => {
+  const words = filteredArticles.value.flatMap(article => article.radarWords)
+  return Array.from(new Set(words)).slice(0, 6)
+})
+
+const currentDomainLabel = computed(() => {
+  if (selectedDomain.value === 'all') return '全部领域'
+  return subscribedDomains.value.find(d => d.key === selectedDomain.value)?.label ?? '当前领域'
+})
+
+const summaryText = computed(() => {
+  const regionLabel = REGION_CONFIGS.find(r => r.key === selectedRegion.value)?.label ?? '全部'
+  const domainLabel = currentDomainLabel.value
+  const noiseLabel = currentNoiseLevelConfig.value?.label ?? '默认'
+  return `${regionLabel} · ${domainLabel} · ${noiseLabel}`
+})
+
 function openArticle(article: Article) {
   store.setCurrentArticle(article.id)
   uni.navigateTo({ url: '/pages/article/index' })
@@ -191,6 +289,10 @@ function openArticle(article: Article) {
 
 function goPreference() {
   uni.switchTab({ url: '/pages/preference/index' })
+}
+
+function goSearch() {
+  uni.switchTab({ url: '/pages/search/index' })
 }
 
 function selectNoise(key: NoiseLevelType) {
@@ -214,326 +316,673 @@ async function onRefresh() {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #F5F5F5;
+  background: #F4F6F8;
 }
 
-/* ── 第一行：导航栏（仅 Logo + 标题） ── */
+.top-shell {
+  padding-bottom: 12rpx;
+  background: linear-gradient(180deg, #F7FBF8 0%, #F3F7F5 100%);
+  border-bottom-left-radius: 28rpx;
+  border-bottom-right-radius: 28rpx;
+  border-bottom: 1rpx solid #E7EDF2;
+}
+
 .nav-bar {
   display: flex;
   align-items: center;
-  padding: 12rpx 28rpx;
-  background: #fff;
+  justify-content: space-between;
+  gap: 18rpx;
+  padding: 24rpx 24rpx 10rpx;
+}
+
+.brand-block {
+  display: flex;
+  align-items: center;
   gap: 14rpx;
-  /* 右侧不设 padding-right，由胶囊按钮自然占位 */
+  min-width: 0;
 }
 
 .nav-logo-icon {
-  width: 48rpx;
-  height: 48rpx;
-  border-radius: 12rpx;
-  background: linear-gradient(135deg, #1DB954, #17A348);
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 18rpx;
+  background: linear-gradient(135deg, #16A34A 0%, #22C55E 100%);
   display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 8rpx 20rpx rgba(34, 197, 94, 0.18);
+}
+
+.nav-logo {
+  color: #FFFFFF;
+  font-size: 28rpx;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.brand-text {
+  min-width: 0;
+}
+
+.nav-title {
+  display: block;
+  font-size: 33rpx;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.2;
+}
+
+.nav-subtitle {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 21rpx;
+  color: #94A3B8;
+  line-height: 1.5;
+}
+
+.nav-search-btn {
+  height: 64rpx;
+  padding: 0 20rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1rpx solid #E5EAF0;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  flex-shrink: 0;
+}
+
+.nav-search-mark {
+  font-size: 24rpx;
+  color: #94A3B8;
+  line-height: 1;
+}
+
+.nav-search-text {
+  font-size: 24rpx;
+  color: #475569;
+  font-weight: 600;
+}
+
+.control-panel {
+  padding: 6rpx 24rpx 0;
+}
+
+.region-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 6rpx;
+  border-radius: 999rpx;
+  background: #EAF0F3;
+}
+
+.region-tab {
+  min-width: 96rpx;
+  height: 54rpx;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748B;
+}
+
+.region-tab text {
+  font-size: 23rpx;
+  font-weight: 600;
+}
+
+.region-tab.active {
+  background: #FFFFFF;
+  color: #0F172A;
+  box-shadow: 0 2rpx 8rpx rgba(15, 23, 42, 0.04);
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: 14rpx;
+}
+
+.domain-scroll {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.domain-tab-list {
+  display: inline-flex;
+  align-items: center;
+  gap: 10rpx;
+  padding-right: 8rpx;
+}
+
+.domain-tab {
+  height: 54rpx;
+  padding: 0 22rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid #E5EAF0;
+  background: rgba(255, 255, 255, 0.92);
+  color: #475569;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.domain-tab text {
+  font-size: 23rpx;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.domain-tab.active {
+  color: #16A34A;
+  border-color: #BFE3C7;
+  background: #ECFDF3;
+}
+
+.noise-entry {
+  flex-shrink: 0;
+  height: 54rpx;
+  padding: 0 18rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1rpx solid #E5EAF0;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.noise-entry-label {
+  font-size: 22rpx;
+  color: #475569;
+  font-weight: 600;
+}
+
+.noise-entry-arrow {
+  font-size: 20rpx;
+  color: #94A3B8;
+}
+
+.hero-card {
+  margin: 18rpx 24rpx 0;
+  padding: 24rpx;
+  border-radius: 26rpx;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, #F8FBF9 100%);
+  border: 1rpx solid #E3EBE7;
+  box-shadow: 0 10rpx 28rpx rgba(15, 23, 42, 0.05);
+}
+
+.hero-top-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.hero-title-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  height: 40rpx;
+  padding: 0 14rpx;
+  border-radius: 999rpx;
+  background: #ECFDF3;
+  color: #15803D;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.hero-title {
+  display: block;
+  margin-top: 14rpx;
+  font-size: 31rpx;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.5;
+}
+
+.hero-count-badge {
+  width: 108rpx;
+  min-height: 108rpx;
+  border-radius: 24rpx;
+  background: #F1F8F3;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.nav-logo {
-  font-size: 28rpx;
-}
-
-.nav-title {
+.hero-count-num {
   font-size: 34rpx;
   font-weight: 700;
-  color: #111;
-  letter-spacing: 0.02em;
+  color: #16A34A;
+  line-height: 1;
 }
 
-/* ── 第二行：地区 Tab + 降噪档位 ── */
-.filter-bar {
+.hero-count-unit {
+  margin-top: 6rpx;
+  font-size: 20rpx;
+  color: #94A3B8;
+  line-height: 1;
+}
+
+.hero-summary {
+  display: block;
+  margin-top: 16rpx;
+  font-size: 23rpx;
+  color: #64748B;
+  line-height: 1.7;
+}
+
+.hero-meta-row {
   display: flex;
-  align-items: center;
-  padding: 10rpx 28rpx;
-  background: #fff;
-  border-bottom: 1.5rpx solid #F0F0F0;
-  gap: 0;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 18rpx;
 }
 
-/* 地区 Tab 组 */
-.region-tabs {
+.meta-pill {
+  min-height: 44rpx;
+  padding: 0 16rpx;
+  border-radius: 999rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.meta-pill text {
+  font-size: 20rpx;
+  font-weight: 600;
+}
+
+.meta-pill.soft {
+  background: #F1F5F9;
+}
+
+.meta-pill.soft text {
+  color: #475569;
+}
+
+.meta-pill.highlight {
+  background: #ECFDF3;
+}
+
+.meta-pill.highlight text {
+  color: #15803D;
+}
+
+.meta-pill.accent {
+  background: #FFF7ED;
+}
+
+.meta-pill.accent text {
+  color: #C2410C;
+}
+
+.hero-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12rpx;
+  margin-top: 20rpx;
+}
+
+.hero-stat-card {
+  min-height: 106rpx;
+  padding: 18rpx 16rpx;
+  border-radius: 20rpx;
   display: flex;
-  align-items: center;
-  gap: 4rpx;
-  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8rpx;
 }
 
-.region-tab {
-  padding: 8rpx 20rpx;
-  border-radius: 32rpx;
-  transition: all 0.2s ease;
-}
-
-.region-tab.active {
+.hero-stat-card.mint {
   background: #F0FDF4;
 }
 
-.region-tab-text {
-  font-size: 26rpx;
-  color: #AAAAAA;
-  font-weight: 500;
-  transition: all 0.2s ease;
+.hero-stat-card.amber {
+  background: #FFF7ED;
 }
 
-.region-tab.active .region-tab-text {
-  color: #1DB954;
+.hero-stat-card.blue {
+  background: #EFF6FF;
+}
+
+.hero-stat-num {
+  font-size: 30rpx;
   font-weight: 700;
+  color: #0F172A;
 }
 
-/* 分隔线 */
-.filter-divider {
-  width: 1.5rpx;
-  height: 32rpx;
-  background: #E8E8E8;
-  flex-shrink: 0;
-  margin: 0 20rpx;
+.hero-stat-label {
+  font-size: 21rpx;
+  color: #64748B;
 }
 
-/* 降噪档位标签 */
-.noise-badge {
-  display: flex;
-  align-items: center;
-  gap: 6rpx;
-  padding: 6rpx 16rpx;
-  border-radius: 40rpx;
-  background: #F0FDF4;
-  border: 1.5rpx solid #BBF7D0;
-  flex-shrink: 0;
-}
-
-.noise-badge-icon {
-  font-size: 24rpx;
-}
-
-.noise-badge-label {
-  font-size: 24rpx;
-  font-weight: 600;
-  color: #1DB954;
-}
-
-.noise-badge-arrow {
-  font-size: 18rpx;
-  color: #1DB954;
-  margin-left: 2rpx;
-}
-
-/* ── 第三行：领域 Tab ── */
-.domain-bar {
-  background: #fff;
-  border-bottom: 1.5rpx solid #EEEEEE;
-  padding: 10rpx 0 10rpx 24rpx;
-}
-
-.domain-scroll {
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.domain-tab-list {
-  display: flex;
-  gap: 16rpx;
-  padding-right: 24rpx;
-}
-
-.domain-tab {
-  padding: 10rpx 24rpx;
-  border-radius: 40rpx;
-  font-size: 25rpx;
-  color: #888;
-  background: #F5F5F5;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1.5rpx solid transparent;
-}
-
-.domain-tab.active {
-  background: #E8F8EE;
-  color: #1DB954;
-  font-weight: 600;
-  border: 1.5rpx solid #A8E6C0;
-}
-
-/* ── 文章列表 ── */
 .article-list {
   flex: 1;
   overflow: hidden;
 }
 
+.list-content {
+  padding-bottom: 28rpx;
+}
+
 .list-top-pad {
-  height: 20rpx;
+  height: 18rpx;
+}
+
+.insight-strip {
+  margin: 0 24rpx 16rpx;
+  padding: 20rpx 22rpx;
+  border-radius: 22rpx;
+  background: #FFFFFF;
+  border: 1rpx solid #E5EAF0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+}
+
+.insight-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.insight-title {
+  display: block;
+  font-size: 27rpx;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.insight-desc {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #94A3B8;
+  line-height: 1.5;
+}
+
+.insight-tags {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10rpx;
+  flex-shrink: 0;
+}
+
+.insight-chip {
+  min-height: 40rpx;
+  padding: 0 14rpx;
+  border-radius: 999rpx;
+  background: #F8FAFC;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.insight-chip text {
+  font-size: 20rpx;
+  color: #475569;
+  font-weight: 600;
+}
+
+.keyword-strip {
+  margin: 0 24rpx 16rpx;
+  padding: 20rpx 22rpx;
+  border-radius: 22rpx;
+  background: #FFFFFF;
+  border: 1rpx solid #E5EAF0;
+}
+
+.keyword-strip-label {
+  display: block;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.keyword-scroll {
+  margin-top: 14rpx;
+  white-space: nowrap;
+}
+
+.keyword-list {
+  display: inline-flex;
+  align-items: center;
+  gap: 10rpx;
+  padding-right: 8rpx;
+}
+
+.keyword-chip {
+  height: 48rpx;
+  padding: 0 18rpx;
+  border-radius: 999rpx;
+  background: #F1F8F3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.keyword-chip text {
+  font-size: 21rpx;
+  color: #15803D;
+  font-weight: 600;
 }
 
 .list-footer {
+  padding: 20rpx 24rpx 12rpx;
   text-align: center;
-  padding: 40rpx 0;
+}
+
+.list-footer text {
   font-size: 22rpx;
-  color: #CCCCCC;
+  color: #94A3B8;
 }
 
-/* ── 空状态 ── */
 .empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 120rpx 64rpx;
+  margin: 24rpx;
+  padding: 84rpx 40rpx;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  border: 1rpx solid #E5EAF0;
   text-align: center;
-}
-
-.empty-icon {
-  font-size: 80rpx;
-  margin-bottom: 24rpx;
 }
 
 .empty-title {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #444;
-  margin-bottom: 12rpx;
   display: block;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #334155;
+  line-height: 1.5;
 }
 
 .empty-desc {
-  font-size: 26rpx;
-  color: #AAAAAA;
-  line-height: 1.6;
-  margin-bottom: 40rpx;
   display: block;
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #94A3B8;
+  line-height: 1.7;
 }
 
 .empty-actions {
   display: flex;
-  gap: 16rpx;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-top: 28rpx;
+}
+
+.empty-btn-outline,
+.empty-btn-primary {
+  min-width: 180rpx;
+  height: 68rpx;
+  padding: 0 20rpx;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .empty-btn-outline {
-  padding: 16rpx 32rpx;
-  border-radius: 40rpx;
-  background: #F0FDF4;
-  color: #1DB954;
-  border: 1rpx solid #BBF7D0;
-  font-size: 26rpx;
-  font-weight: 500;
+  background: #F8FAFC;
+  border: 1rpx solid #E5EAF0;
+}
+
+.empty-btn-outline text {
+  font-size: 24rpx;
+  color: #475569;
+  font-weight: 600;
 }
 
 .empty-btn-primary {
-  padding: 16rpx 32rpx;
-  border-radius: 40rpx;
-  background: #1DB954;
-  color: #fff;
-  font-size: 26rpx;
-  font-weight: 500;
+  background: #16A34A;
 }
 
-/* ── 降噪选择器弹窗 ── */
+.empty-btn-primary text {
+  font-size: 24rpx;
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
 .overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 100;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.34);
   display: flex;
   align-items: flex-end;
+  z-index: 100;
 }
 
 .noise-sheet {
-  background: #fff;
-  border-radius: 40rpx 40rpx 0 0;
   width: 100%;
-  max-height: 80vh;
+  background: #FFFFFF;
+  border-radius: 34rpx 34rpx 0 0;
 }
 
 .sheet-handle {
   width: 72rpx;
   height: 8rpx;
-  background: #E0E0E0;
-  border-radius: 4rpx;
-  margin: 24rpx auto 0;
+  border-radius: 999rpx;
+  background: #D5DCE3;
+  margin: 18rpx auto 0;
 }
 
 .sheet-content {
-  padding: 24rpx 32rpx 0;
+  padding: 18rpx 24rpx 0;
+}
+
+.sheet-header {
+  margin-bottom: 16rpx;
 }
 
 .sheet-title {
-  font-size: 32rpx;
-  font-weight: 700;
-  color: #1A1A1A;
   display: block;
-  margin-bottom: 24rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.sheet-subtitle {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #94A3B8;
+  line-height: 1.6;
 }
 
 .noise-option {
   display: flex;
   align-items: center;
-  gap: 24rpx;
-  padding: 24rpx;
-  border-radius: 20rpx;
-  margin-bottom: 16rpx;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 22rpx 20rpx;
+  border-radius: 22rpx;
+  background: #F8FAFC;
+  border: 1rpx solid transparent;
 }
 
-.noise-opt-icon {
-  font-size: 40rpx;
-  width: 48rpx;
-  text-align: center;
-  flex-shrink: 0;
+.noise-option + .noise-option {
+  margin-top: 12rpx;
 }
 
-.noise-opt-text {
+.noise-option.active {
+  background: #F0FDF4;
+  border-color: #BBF7D0;
+}
+
+.noise-option-main {
   flex: 1;
+  min-width: 0;
 }
 
-.noise-opt-label-row {
+.noise-label-row {
   display: flex;
   align-items: center;
-  gap: 12rpx;
-  margin-bottom: 8rpx;
+  gap: 10rpx;
 }
 
 .noise-opt-label {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #1A1A1A;
+  font-size: 27rpx;
+  font-weight: 700;
+  color: #0F172A;
 }
 
 .rec-badge {
-  background: #1DB954;
-  border-radius: 8rpx;
-  padding: 2rpx 10rpx;
+  height: 36rpx;
+  padding: 0 12rpx;
+  border-radius: 999rpx;
+  background: #DCFCE7;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .rec-text {
-  color: #fff;
-  font-size: 20rpx;
-  font-weight: 600;
-}
-
-.noise-opt-desc {
-  font-size: 24rpx;
-  color: #888;
-  display: block;
-}
-
-.noise-check {
-  font-size: 28rpx;
-  color: #1DB954;
+  font-size: 19rpx;
+  color: #15803D;
   font-weight: 700;
+}
+
+.noise-opt-desc,
+.noise-opt-count {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #94A3B8;
+}
+
+.noise-check-wrap {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  border: 2rpx solid #CBD5E1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
+.noise-option.active .noise-check-wrap {
+  border-color: #16A34A;
+}
+
+.noise-check-dot {
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 50%;
+  background: #16A34A;
+}
+
 .sheet-bottom-pad {
-  height: 40rpx;
+  height: 28rpx;
 }
 </style>
