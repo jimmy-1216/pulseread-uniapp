@@ -8,7 +8,6 @@
           </view>
           <view class="brand-text">
             <text class="nav-title">微澜</text>
-            <text class="nav-subtitle">筛出更值得持续关注的行业资讯</text>
           </view>
         </view>
         <view class="nav-search-btn" @tap="goSearch">
@@ -60,49 +59,6 @@
         </view>
       </view>
 
-      <view class="hero-card">
-        <view class="hero-top-row">
-          <view class="hero-title-wrap">
-            <text class="hero-kicker">今日焦点</text>
-            <text class="hero-title">{{ featuredArticle?.title ?? '按你的偏好整理值得先看的内容' }}</text>
-          </view>
-          <view class="hero-count-badge">
-            <text class="hero-count-num">{{ filteredArticles.length }}</text>
-            <text class="hero-count-unit">篇</text>
-          </view>
-        </view>
-
-        <text class="hero-summary">
-          {{ featuredArticle?.aiSummary ?? '当前筛选下暂无内容，调整地区、领域或阅读密度后再查看。' }}
-        </text>
-
-        <view class="hero-meta-row">
-          <view class="meta-pill soft">
-            <text>{{ summaryText }}</text>
-          </view>
-          <view v-if="featuredArticle" class="meta-pill highlight">
-            <text>AI {{ featuredArticle.aiScore }}</text>
-          </view>
-          <view v-if="featuredArticle?.radarWords?.[0]" class="meta-pill accent">
-            <text>{{ featuredArticle.radarWords[0] }}</text>
-          </view>
-        </view>
-
-        <view class="hero-stats-grid">
-          <view class="hero-stat-card mint">
-            <text class="hero-stat-num">{{ highScoreCount }}</text>
-            <text class="hero-stat-label">高分内容</text>
-          </view>
-          <view class="hero-stat-card amber">
-            <text class="hero-stat-num">{{ radarMatchedCount }}</text>
-            <text class="hero-stat-label">雷达命中</text>
-          </view>
-          <view class="hero-stat-card blue">
-            <text class="hero-stat-num">{{ translatedCount }}</text>
-            <text class="hero-stat-label">双语资讯</text>
-          </view>
-        </view>
-      </view>
     </view>
 
     <scroll-view
@@ -134,32 +90,6 @@
 
       <view v-else class="list-content">
         <view class="list-top-pad" />
-
-        <view class="insight-strip">
-          <view class="insight-copy">
-            <text class="insight-title">为你整理的资讯流</text>
-            <text class="insight-desc">优先展示更高相关度、更值得持续跟进的内容</text>
-          </view>
-          <view class="insight-tags">
-            <view v-if="selectedDomain !== 'all'" class="insight-chip">
-              <text>{{ currentDomainLabel }}</text>
-            </view>
-            <view class="insight-chip">
-              <text>{{ currentNoiseLevelConfig?.label }}</text>
-            </view>
-          </view>
-        </view>
-
-        <view v-if="hotKeywords.length" class="keyword-strip">
-          <text class="keyword-strip-label">今日热词</text>
-          <scroll-view scroll-x class="keyword-scroll" :show-scrollbar="false">
-            <view class="keyword-list">
-              <view v-for="word in hotKeywords" :key="word" class="keyword-chip">
-                <text>{{ word }}</text>
-              </view>
-            </view>
-          </scroll-view>
-        </view>
 
         <ArticleCard
           v-for="article in filteredArticles"
@@ -251,37 +181,6 @@ const filteredArticles = computed(() => {
   })
 })
 
-const featuredArticle = computed(() => filteredArticles.value[0] ?? null)
-
-const highScoreCount = computed(() =>
-  filteredArticles.value.filter(article => article.aiScore >= 85).length
-)
-
-const radarMatchedCount = computed(() =>
-  filteredArticles.value.filter(article => article.radarWords.length > 0).length
-)
-
-const translatedCount = computed(() =>
-  filteredArticles.value.filter(article => article.isAiTranslated).length
-)
-
-const hotKeywords = computed(() => {
-  const words = filteredArticles.value.flatMap(article => article.radarWords)
-  return Array.from(new Set(words)).slice(0, 6)
-})
-
-const currentDomainLabel = computed(() => {
-  if (selectedDomain.value === 'all') return '全部领域'
-  return subscribedDomains.value.find(d => d.key === selectedDomain.value)?.label ?? '当前领域'
-})
-
-const summaryText = computed(() => {
-  const regionLabel = REGION_CONFIGS.find(r => r.key === selectedRegion.value)?.label ?? '全部'
-  const domainLabel = currentDomainLabel.value
-  const noiseLabel = currentNoiseLevelConfig.value?.label ?? '默认'
-  return `${regionLabel} · ${domainLabel} · ${noiseLabel}`
-})
-
 function openArticle(article: Article) {
   store.setCurrentArticle(article.id)
   uni.navigateTo({ url: '/pages/article/index' })
@@ -320,10 +219,10 @@ async function onRefresh() {
 }
 
 .top-shell {
-  padding-bottom: 12rpx;
+  padding-bottom: 4rpx;
   background: linear-gradient(180deg, #F7FBF8 0%, #F3F7F5 100%);
-  border-bottom-left-radius: 28rpx;
-  border-bottom-right-radius: 28rpx;
+  border-bottom-left-radius: 20rpx;
+  border-bottom-right-radius: 20rpx;
   border-bottom: 1rpx solid #E7EDF2;
 }
 
@@ -331,21 +230,21 @@ async function onRefresh() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18rpx;
-  padding: 24rpx 24rpx 10rpx;
+  gap: 12rpx;
+  padding: 14rpx 24rpx 6rpx;
 }
 
 .brand-block {
   display: flex;
   align-items: center;
-  gap: 14rpx;
+  gap: 10rpx;
   min-width: 0;
 }
 
 .nav-logo-icon {
-  width: 60rpx;
-  height: 60rpx;
-  border-radius: 18rpx;
+  width: 46rpx;
+  height: 46rpx;
+  border-radius: 14rpx;
   background: linear-gradient(135deg, #16A34A 0%, #22C55E 100%);
   display: flex;
   align-items: center;
@@ -356,7 +255,7 @@ async function onRefresh() {
 
 .nav-logo {
   color: #FFFFFF;
-  font-size: 28rpx;
+  font-size: 24rpx;
   font-weight: 700;
   line-height: 1;
 }
@@ -367,23 +266,15 @@ async function onRefresh() {
 
 .nav-title {
   display: block;
-  font-size: 33rpx;
+  font-size: 29rpx;
   font-weight: 700;
   color: #0F172A;
   line-height: 1.2;
 }
 
-.nav-subtitle {
-  display: block;
-  margin-top: 6rpx;
-  font-size: 21rpx;
-  color: #94A3B8;
-  line-height: 1.5;
-}
-
 .nav-search-btn {
-  height: 64rpx;
-  padding: 0 20rpx;
+  height: 56rpx;
+  padding: 0 18rpx;
   border-radius: 999rpx;
   background: rgba(255, 255, 255, 0.92);
   border: 1rpx solid #E5EAF0;
@@ -394,33 +285,33 @@ async function onRefresh() {
 }
 
 .nav-search-mark {
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: #94A3B8;
   line-height: 1;
 }
 
 .nav-search-text {
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: #475569;
   font-weight: 600;
 }
 
 .control-panel {
-  padding: 6rpx 24rpx 0;
+  padding: 2rpx 24rpx 0;
 }
 
 .region-tabs {
   display: inline-flex;
   align-items: center;
-  gap: 10rpx;
-  padding: 6rpx;
+  gap: 8rpx;
+  padding: 4rpx;
   border-radius: 999rpx;
   background: #EAF0F3;
 }
 
 .region-tab {
-  min-width: 96rpx;
-  height: 54rpx;
+  min-width: 88rpx;
+  height: 48rpx;
   border-radius: 999rpx;
   display: flex;
   align-items: center;
@@ -429,7 +320,7 @@ async function onRefresh() {
 }
 
 .region-tab text {
-  font-size: 23rpx;
+  font-size: 21rpx;
   font-weight: 600;
 }
 
@@ -442,8 +333,8 @@ async function onRefresh() {
 .control-row {
   display: flex;
   align-items: center;
-  gap: 12rpx;
-  margin-top: 14rpx;
+  gap: 8rpx;
+  margin-top: 8rpx;
 }
 
 .domain-scroll {
@@ -454,13 +345,13 @@ async function onRefresh() {
 .domain-tab-list {
   display: inline-flex;
   align-items: center;
-  gap: 10rpx;
-  padding-right: 8rpx;
+  gap: 8rpx;
+  padding-right: 6rpx;
 }
 
 .domain-tab {
-  height: 54rpx;
-  padding: 0 22rpx;
+  height: 48rpx;
+  padding: 0 18rpx;
   border-radius: 999rpx;
   border: 1rpx solid #E5EAF0;
   background: rgba(255, 255, 255, 0.92);
@@ -471,7 +362,7 @@ async function onRefresh() {
 }
 
 .domain-tab text {
-  font-size: 23rpx;
+  font-size: 21rpx;
   font-weight: 600;
   line-height: 1;
 }
@@ -484,8 +375,8 @@ async function onRefresh() {
 
 .noise-entry {
   flex-shrink: 0;
-  height: 54rpx;
-  padding: 0 18rpx;
+  height: 48rpx;
+  padding: 0 16rpx;
   border-radius: 999rpx;
   background: rgba(255, 255, 255, 0.92);
   border: 1rpx solid #E5EAF0;
@@ -495,13 +386,13 @@ async function onRefresh() {
 }
 
 .noise-entry-label {
-  font-size: 22rpx;
+  font-size: 20rpx;
   color: #475569;
   font-weight: 600;
 }
 
 .noise-entry-arrow {
-  font-size: 20rpx;
+  font-size: 18rpx;
   color: #94A3B8;
 }
 
@@ -676,106 +567,7 @@ async function onRefresh() {
 }
 
 .list-top-pad {
-  height: 18rpx;
-}
-
-.insight-strip {
-  margin: 0 24rpx 16rpx;
-  padding: 20rpx 22rpx;
-  border-radius: 22rpx;
-  background: #FFFFFF;
-  border: 1rpx solid #E5EAF0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18rpx;
-}
-
-.insight-copy {
-  flex: 1;
-  min-width: 0;
-}
-
-.insight-title {
-  display: block;
-  font-size: 27rpx;
-  font-weight: 700;
-  color: #0F172A;
-}
-
-.insight-desc {
-  display: block;
-  margin-top: 8rpx;
-  font-size: 22rpx;
-  color: #94A3B8;
-  line-height: 1.5;
-}
-
-.insight-tags {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10rpx;
-  flex-shrink: 0;
-}
-
-.insight-chip {
-  min-height: 40rpx;
-  padding: 0 14rpx;
-  border-radius: 999rpx;
-  background: #F8FAFC;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.insight-chip text {
-  font-size: 20rpx;
-  color: #475569;
-  font-weight: 600;
-}
-
-.keyword-strip {
-  margin: 0 24rpx 16rpx;
-  padding: 20rpx 22rpx;
-  border-radius: 22rpx;
-  background: #FFFFFF;
-  border: 1rpx solid #E5EAF0;
-}
-
-.keyword-strip-label {
-  display: block;
-  font-size: 24rpx;
-  font-weight: 700;
-  color: #0F172A;
-}
-
-.keyword-scroll {
-  margin-top: 14rpx;
-  white-space: nowrap;
-}
-
-.keyword-list {
-  display: inline-flex;
-  align-items: center;
-  gap: 10rpx;
-  padding-right: 8rpx;
-}
-
-.keyword-chip {
-  height: 48rpx;
-  padding: 0 18rpx;
-  border-radius: 999rpx;
-  background: #F1F8F3;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.keyword-chip text {
-  font-size: 21rpx;
-  color: #15803D;
-  font-weight: 600;
+  height: 2rpx;
 }
 
 .list-footer {
